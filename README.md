@@ -78,3 +78,11 @@ Prática de trading com **dinheiro fictício** (US$ 10.000). Nada aqui é recome
 - **Piloto automático:** o Miquéias opera sozinho com uma de três estratégias (cruzamento de EMA 9/21, RSI 30/70, rompimento de Donchian 20/10), em treino acelerado sobre o histórico ou ao vivo (checando a cada 20 s). Cada decisão vai para o **Diário do Miquéias** com o motivo.
 - **Estudos:** o Miquéias testa as 3 estratégias em 6 mercados, gera um ranking e aprendizados, ajusta o piloto para a melhor e avança numa trilha de 10 lições.
 - **Simuladores na web:** lista de sites de paper trading conferida por pesquisa em nov/2026, e um botão para ele pesquisar mais.
+
+## Controle da tela pelo Horácio
+
+O módulo `js/asafe-ui.js` (vindo de `companynathanael/Hor-cio-Jarvis`, commit 6a26f59) publica no Asafe as ações `ui.snapshot`, `ui.click`, `ui.type`, `ui.key`, `ui.scroll`, `ui.wait` e `ui.control`. Assim o Horácio lê a tela do Miquéias, clica, digita, rola e espera a resposta.
+
+- O aviso **"Horácio está operando"** com o botão **Parar** aparece sempre na primeira ação, mesmo sem `ui.control`. Ajuste feito na revisão.
+- Menus fechados e janelas fechadas não aparecem para o Horácio (o módulo verifica a transparência dos ancestrais). Ajuste feito na revisão.
+- Pedem `confirm: true` (confirmação na conversa do Horácio): Sair, Apagar todas as conversas, Apagar conversa, Chave de API, Salvar configurações, Zerar conta fictícia e o piloto automático de trade. Campos de senha e da chave nunca devolvem o valor.

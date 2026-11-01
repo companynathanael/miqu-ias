@@ -681,6 +681,12 @@ kbd { margin-left: auto; font-size: 10.5px; color: var(--muted); border: 1px sol
   .tl-grid, .tl-grid.study { grid-template-columns: minmax(0, 1fr); }
 }
 
+/* aviso "Horácio está operando" no visual do Miquéias */
+.asafe-ui-banner { font-family: var(--font) !important; background: linear-gradient(155deg, rgba(30,40,46,.82), rgba(6,12,15,.9)) !important; border-color: rgba(0,229,255,.35) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.1), 0 14px 40px -12px var(--cyan-glow) !important; top: max(14px, env(safe-area-inset-top, 0px)) !important; }
+.asafe-ui-banner i { background: var(--cyan) !important; box-shadow: 0 0 10px var(--cyan); }
+.asafe-ui-banner button { background: var(--danger) !important; color: #fff !important; font-weight: 600; }
+.asafe-ui-ring { outline-color: var(--cyan) !important; }
+
 /* telas baixas (notebooks, janelas pequenas) */
 @media (max-height: 720px) {
   .welcome { padding: 8px 0; gap: 4px; }

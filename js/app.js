@@ -1086,5 +1086,29 @@ function connectAsafe() {
     if (status !== "online") announced = false;
   });
   window.miqueiasAsafe = link;
+
+  // Controle da tela pelo Horácio (ações ui.*: ler, clicar, digitar, rolar, esperar)
+  if (window.AsafeUI) {
+    window.AsafeUI.attach(link, {
+      app: "Miquéias",
+      mainInput: "#input",
+      isBusy: () => !!state.busy,
+      screen: () => {
+        if (!$("#login").classList.contains("hidden")) return "login";
+        if ($("#settings").classList.contains("open")) return "configurações";
+        if (state.view === "lab") return "laboratório de trade";
+        return "chat";
+      },
+      protected: [
+        { selector: '[data-action="logout"]', reason: "Sair da conta" },
+        { selector: '[data-action="clear"]', reason: "Apagar todas as conversas" },
+        { selector: "[data-del]", reason: "Apagar conversa" },
+        { selector: "#s-key", reason: "Chave de API" },
+        { selector: "#s-save", reason: "Salvar configurações" },
+        { selector: "#tl-reset", reason: "Zerar a conta fictícia de trade" },
+        { selector: "#tl-go", reason: "Ligar ou desligar o piloto automático de trade" },
+      ],
+    });
+  }
 }
 connectAsafe();
