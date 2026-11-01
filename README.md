@@ -46,7 +46,7 @@ assets/           logo (SVG + imagem original)
 
 ## Arquivo único
 
-`miqueias.html` traz o site inteiro (HTML, CSS e JS) em um só arquivo: basta abrir com dois cliques, sem servidor.
+`miqueias.html` (e a cópia `dist/index.html`) traz o site inteiro (HTML, CSS e JS) em um só arquivo: basta abrir com dois cliques, sem servidor.
 Ele é gerado a partir dos arquivos em `css/` e `js/`; edite-os e gere de novo quando mudar algo.
 
 ## Conexão com o Asafe
