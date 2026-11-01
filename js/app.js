@@ -1,6 +1,7 @@
 import { renderMarkdown } from "./markdown.js";
 import { demoReply, streamDemo, THINK_STEPS } from "./demo.js";
 import { playIntro } from "./intro.js";
+import { createTradeLab } from "./trade.js";
 
 /* =========================================================
    Utilidades
@@ -33,6 +34,7 @@ const ICON = {
   trash: '<svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>',
   file: '<svg viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6Z"/><path d="M14 3v6h6"/></svg>',
   x: '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+  globe: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>',
   spark: '<svg viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/></svg>',
 };
 
@@ -53,6 +55,7 @@ const state = {
   chats: store.get("miq.chats", []),
   currentId: null,
   deep: false,
+  search: false,
   busy: null, // AbortController quando gerando
   pendingFile: null,
 };
@@ -315,6 +318,7 @@ function renderHistory() {
 
 function openChat(id) {
   if (state.busy) state.busy.abort();
+  showView("chat");
   state.currentId = id;
   const chat = current();
   const msgs = $("#messages");
@@ -364,7 +368,9 @@ function aiShell(animate) {
     <div class="body">
       <div class="name">Miquéias <small></small></div>
       <div class="think-slot"></div>
+      <div class="search-slot"></div>
       <div class="md"></div>
+      <div class="sources"></div>
       <div class="actions"></div>
     </div>`;
   $("#messages").append(el);
@@ -385,6 +391,8 @@ function addAiMsg(m, isLast, animate = true) {
   el.classList.toggle("last", isLast);
   el.querySelector(".name small").textContent = m.model ? (MODELS.find((x) => x.id === m.model)?.label.split("· ")[1] || "") : "";
   if (m.thinking) renderThinking(el, m.thinking, false);
+  if (m.searches?.length) renderSearching(el, m.searches, false);
+  if (m.sources?.length) renderSources(el, m.sources);
   el.querySelector(".md").innerHTML = m.error ? "" : renderMarkdown(m.content);
   if (m.error) showError(el, m.error);
   fillActions(el, m);
@@ -400,6 +408,32 @@ function renderThinking(el, text, live) {
   const body = slot.querySelector(".think-body");
   if (steps) body.innerHTML = `<ol>${steps.map((s) => `<li></li>`).join("")}</ol>`, $$("li", body).forEach((li, i) => (li.textContent = steps[i]));
   else body.textContent = text;
+}
+
+function renderSearching(el, queries, live) {
+  const slot = el.querySelector(".search-slot");
+  slot.innerHTML = `<div class="search-box ${live ? "live" : ""}">${ICON.globe}<span class="${live ? "shimmer" : ""}">${live ? "Pesquisando na web…" : `Pesquisou na web (${queries.length} ${queries.length === 1 ? "busca" : "buscas"})`}</span></div><ul class="search-q"></ul>`;
+  const ul = slot.querySelector("ul");
+  queries.filter(Boolean).forEach((q) => { const li = document.createElement("li"); li.textContent = q; ul.append(li); });
+}
+
+function renderSources(el, sources) {
+  const box = el.querySelector(".sources");
+  box.innerHTML = '<div class="src-head">Fontes</div><div class="src-list"></div>';
+  const list = box.querySelector(".src-list");
+  sources.filter((s) => /^https?:\/\//.test(s.url)).slice(0, 12).forEach((s, i) => {
+    const a = document.createElement("a");
+    a.href = s.url;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    a.title = s.title || s.url;
+    const n = document.createElement("b");
+    n.textContent = i + 1;
+    const host = document.createElement("span");
+    host.textContent = new URL(s.url).hostname.replace(/^www\./, "");
+    a.append(n, host);
+    list.append(a);
+  });
 }
 
 function showError(el, msg) {
@@ -420,9 +454,12 @@ function scrollToEnd(smooth = true) {
 }
 
 /* ---------- envio ---------- */
-async function send(text, { regenerate = false, onText: onTextExt } = {}) {
+async function send(text, { regenerate = false, onText: onTextExt, search } = {}) {
   if (state.busy) return;
   text = text.trim();
+  let useSearch = search ?? state.search;
+  const cmd = text.match(/^\/pesquisa(?:r)?\s+([\s\S]+)/i);
+  if (cmd) { useSearch = true; text = cmd[1].trim(); }
   if (!text && !state.pendingFile && !regenerate) return;
 
   const model = state.settings.model;
@@ -457,6 +494,7 @@ async function send(text, { regenerate = false, onText: onTextExt } = {}) {
 
   $$(".msg.ai.last").forEach((e) => e.classList.remove("last"));
   const am = { role: "assistant", content: "", model };
+  if (useSearch) { am.searches = []; am.sources = []; }
   const el = aiShell(true);
   el.classList.add("streaming", "last");
   el.querySelector(".name small").textContent = MODELS.find((x) => x.id === model)?.label.split("· ")[1] || "";
@@ -503,7 +541,15 @@ async function send(text, { regenerate = false, onText: onTextExt } = {}) {
       }
       const lastUser = [...chat.messages].reverse().find((m) => m.role === "user");
       const prompt = lastUser.content + (lastUser.file ? ` ${lastUser.file.name}` : "");
-      await streamDemo(demoReply(state.settings.name || state.user?.name, prompt), { signal: ctrl.signal, onText });
+      if (useSearch) {
+        await sleep(500);
+        const r = demoResearch(prompt);
+        am.sources = r.sources;
+        if (r.sources.length) renderSources(el, r.sources);
+        await streamDemo(r.text, { signal: ctrl.signal, onText });
+      } else {
+        await streamDemo(demoReply(state.settings.name || state.user?.name, prompt), { signal: ctrl.signal, onText });
+      }
     } else {
       const { streamClaude } = await import("./claude.js");
       const history = chat.messages
@@ -513,9 +559,15 @@ async function send(text, { regenerate = false, onText: onTextExt } = {}) {
       await streamClaude({
         apiKey: state.settings.apiKey,
         model,
-        system: state.settings.system || DEFAULT_SYSTEM,
+        system: (state.settings.system || DEFAULT_SYSTEM) + (useSearch ? `\n\nHoje é ${new Date().toLocaleDateString("pt-BR")}. Pesquise na web antes de responder, compare as fontes e cite-as no texto. Diga claramente quando algo não pôde ser confirmado.` : ""),
         messages: history,
         deep: state.deep,
+        search: useSearch,
+        onSearch: (q) => { am.searches.push(q); renderSearching(el, am.searches, true); },
+        onSources: (list) => {
+          list.forEach((s) => { if (!am.sources.some((x) => x.url === s.url)) am.sources.push(s); });
+          renderSources(el, am.sources);
+        },
         signal: ctrl.signal,
         onText,
         onThinking: (t) => {
@@ -526,6 +578,7 @@ async function send(text, { regenerate = false, onText: onTextExt } = {}) {
         },
       });
       if (thinking) renderThinking(el, thinking, false);
+      if (useSearch && am.searches.length) renderSearching(el, am.searches, false);
     }
   } catch (err) {
     if (err?.name !== "AbortError" && !ctrl.signal.aborted) {
@@ -642,6 +695,18 @@ function bind() {
   $("#composer").addEventListener("dragover", (e) => e.preventDefault());
   $("#composer").addEventListener("drop", (e) => { e.preventDefault(); attach(e.dataTransfer.files[0]); });
 
+  $("#search-toggle").addEventListener("click", () => setSearch(!state.search));
+  $("#skills").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-skill]");
+    if (!b) return;
+    if (b.dataset.skill === "research") {
+      if (state.view !== "chat" || current()) openChat(null);
+      setSearch(true);
+      $("#input").focus();
+    }
+    if (b.dataset.skill === "trade") showView("lab");
+    closeSidebarMobile();
+  });
   $("#think-toggle").addEventListener("click", (e) => {
     state.deep = !state.deep;
     e.currentTarget.setAttribute("aria-pressed", state.deep);
@@ -816,6 +881,38 @@ function bind() {
   link.remove();
   document.head.append(clone);
 })();
+/* ---------- habilidades: visões, pesquisa e laboratório ---------- */
+let lab = null;
+function showView(v) {
+  state.view = v;
+  $("#app").dataset.view = v;
+  $("#lab").classList.toggle("hidden", v !== "lab");
+  $$("#skills [data-skill]").forEach((b) => b.classList.toggle("active", b.dataset.skill === "trade" && v === "lab"));
+  if (v === "lab") { lab.open(); $$(".h-item.active").forEach((x) => x.classList.remove("active")); }
+}
+
+function setSearch(on) {
+  state.search = on;
+  $("#search-toggle").setAttribute("aria-pressed", on);
+  $("#input").placeholder = on ? "O que o Miquéias deve pesquisar na web?" : "Pergunte qualquer coisa ao Miquéias…";
+  $$("#skills [data-skill=research]").forEach((b) => b.classList.toggle("active", on));
+}
+
+function demoResearch(q) {
+  const sims = /simulad|paper|trad|demo|bolsa|cripto|invest/i.test(q);
+  if (sims) {
+    const list = lab.sites.map((s) => `- **${s.name}** (${s.tag}): ${s.note}`).join("\n");
+    return {
+      sources: lab.sites.map((s) => ({ title: s.name, url: s.url })),
+      text: `Aqui estão os simuladores de trading que eu conheço e que foram conferidos por pesquisa em novembro de 2026:\n\n${list}\n\n> Modo demonstração: esta lista vem da minha base local. Com uma chave da API em **Configurações**, eu pesquiso na internet em tempo real e trago fontes novas.`,
+    };
+  }
+  return {
+    sources: [],
+    text: `Para pesquisar **"${q.slice(0, 120)}"** na internet eu preciso de um modelo real.\n\n1. Abra **Configurações** e cole sua chave da API.\n2. Escolha **Miquéias 2 · Pro** no topo.\n3. Peça de novo com o botão **Pesquisa na web** ligado, ou comece a mensagem com \`/pesquisar\`.\n\nAí eu busco em várias fontes, comparo e cito cada link.`,
+  };
+}
+
 /* ---------- logos vivas: desenho inline + brilho que percorre o traço ---------- */
 const LOGO_PATHS = [
   ["logo-frame", "M43 57 L27 31 L27 93 L4 80 L4 21 L32 5 L50 37 L68 5 L96 21 L96 80 L73 93 L73 31 L57 57"],
@@ -876,6 +973,13 @@ addEventListener("pointermove", (e) => {
 /* =========================================================
    Início: abertura → login ou app
    ========================================================= */
+lab = createTradeLab({
+  root: $("#lab"),
+  toast,
+  store,
+  askChat: (t) => { openChat(null); send(t); },
+  research: (t) => { openChat(null); send(t, { search: true }); },
+});
 inlineLogos();
 applyMotion();
 startBackground();
@@ -932,6 +1036,34 @@ function connectAsafe() {
       "chat.new": {
         desc: "Abre uma conversa nova no Miquéias",
         handler: () => { ensureReady(); openChat(null); return { ok: true }; },
+      },
+      "research.run": {
+        desc: "Pesquisa um assunto na web e devolve a resposta com as fontes. payload: { query }",
+        handler: async ({ query }, ctx) => {
+          query = String(query || "").trim();
+          if (!query) throw asafeError("bad_request", "Pesquisa vazia.");
+          ensureReady();
+          openChat(null);
+          toast(`Pesquisa pedida por ${agentName(ctx.from)} pelo Asafe`);
+          const am = await send(query, { search: true, onText: (t) => ctx.progress({ delta: t }) });
+          if (!am) throw asafeError("rejected", "O Miquéias não conseguiu iniciar a pesquisa (confira o modelo e a chave da API).");
+          if (am.error) throw asafeError("model_error", am.error);
+          const chat = current();
+          if (chat && !chat.title.startsWith("⇄")) { chat.title = `⇄ ${agentName(ctx.from)}: ${chat.title}`; saveChats(); renderHistory(); }
+          return { reply: am.content, sources: am.sources || [], searches: am.searches || [], model: am.model };
+        },
+      },
+      "trade.status": {
+        desc: "Resumo do Laboratório de Trade: conta fictícia, posição, piloto automático, último estudo e diário",
+        handler: () => lab.status(),
+      },
+      "trade.study": {
+        desc: "O Miquéias testa as estratégias em BTC, ETH e SOL e devolve o ranking e os aprendizados",
+        handler: () => { ensureReady(); return lab.study(); },
+      },
+      "trade.autopilot": {
+        desc: "Liga ou desliga o piloto automático com dinheiro fictício. payload: { on, strategy?: cruzamento|rsi|rompimento, symbol?: BTCUSDT|ETHUSDT|SOLUSDT, mode?: replay|live }",
+        handler: (p) => { ensureReady(); showView("lab"); return lab.autopilot(p); },
       },
       "settings.model": {
         desc: `Troca o modelo do Miquéias. payload: { model: ${MODELS.map((m) => `"${m.id}"`).join(" | ")} }`,

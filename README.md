@@ -59,5 +59,22 @@ O Miquéias se conecta ao **Asafe** (protocolo em `companynathanael/Asafe`) pelo
 | `chat.ask` `{ prompt, newChat? }` | Abre uma conversa "⇄ Horácio: …", responde na tela e devolve o texto em streaming |
 | `chat.new` | Abre uma conversa nova |
 | `settings.model` `{ model }` | Troca o modelo |
+| `research.run` `{ query }` | Pesquisa na web e devolve a resposta com as fontes |
+| `trade.status` | Conta fictícia, posição, piloto automático, último estudo e diário |
+| `trade.study` | Testa as 3 estratégias em BTC, ETH e SOL e devolve o ranking |
+| `trade.autopilot` `{ on, strategy?, symbol?, mode? }` | Liga/desliga o piloto automático (dinheiro fictício) |
 
 Ele tenta o servidor do Asafe em `http://localhost:7300`; se não achar, usa o modo navegador (BroadcastChannel), que exige a página do Asafe aberta no mesmo navegador. Pedidos são recusados enquanto o Miquéias está na tela de entrada ou respondendo outra mensagem.
+
+## Habilidades
+
+### Pesquisa
+Liga com o botão **Pesquisa na web**, pelo item *Pesquisa* da barra lateral, começando a mensagem com `/pesquisar`, ou pelo Asafe (`research.run`). Com uma chave da API, o Miquéias usa a busca na web do Claude, mostra as consultas feitas e cita as fontes. No modo demonstração ele não acessa a internet e avisa isso.
+
+### Laboratório de Trade
+Prática de trading com **dinheiro fictício** (US$ 10.000). Nada aqui é recomendação de investimento.
+
+- **Simulador:** gráfico de velas de BTC, ETH e SOL com preços públicos da Binance (`data-api.binance.vision`). Sem conexão, usa um mercado sintético e avisa na tela. Compra e venda manual, stop de 4%, alvo de 8%, taxa de 0,1% e 50% do patrimônio por operação.
+- **Piloto automático:** o Miquéias opera sozinho com uma de três estratégias (cruzamento de EMA 9/21, RSI 30/70, rompimento de Donchian 20/10), em treino acelerado sobre o histórico ou ao vivo (checando a cada 20 s). Cada decisão vai para o **Diário do Miquéias** com o motivo.
+- **Estudos:** o Miquéias testa as 3 estratégias em 6 mercados, gera um ranking e aprendizados, ajusta o piloto para a melhor e avança numa trilha de 10 lições.
+- **Simuladores na web:** lista de sites de paper trading conferida por pesquisa em nov/2026, e um botão para ele pesquisar mais.

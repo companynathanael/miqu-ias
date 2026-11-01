@@ -15,44 +15,72 @@ async function getClient(apiKey) {
 // Modelos que aceitam o fallback automático do servidor em caso de recusa.
 const FALLBACK_MODELS = new Set(["claude-opus-5-5", "claude-sonnet-5-5"]);
 
+// Busca na web: a versão com filtragem dinâmica roda no Opus 5.5 e Sonnet 5.5; o Haiku usa a básica.
+const webSearchTool = (model) => ({
+  type: model === "claude-haiku-5-5" ? "web_search_20250305" : "web_search_20260209",
+  name: "web_search",
+  max_uses: 6,
+});
+
 /**
  * Faz streaming de uma resposta do Claude.
  * @param {object} o
  * @param {string} o.apiKey
  * @param {string} o.model
  * @param {string} o.system
- * @param {{role:'user'|'assistant', content:string}[]} o.messages
- * @param {boolean} o.deep  raciocínio profundo → effort "high" + resumo do raciocínio
+ * @param {{role:'user'|'assistant', content:any}[]} o.messages
+ * @param {boolean} o.deep    raciocínio profundo → effort "high" + resumo do raciocínio
+ * @param {boolean} o.search  habilidade de pesquisa → ferramenta de busca na web
  * @param {AbortSignal} o.signal
  * @param {(t:string)=>void} o.onText
  * @param {(t:string)=>void} o.onThinking
+ * @param {(q:string)=>void} o.onSearch    consulta que o modelo está pesquisando
+ * @param {(s:{title:string,url:string}[])=>void} o.onSources  fontes encontradas
  */
-export async function streamClaude({ apiKey, model, system, messages, deep, signal, onText, onThinking }) {
+export async function streamClaude({ apiKey, model, system, messages, deep, search, signal, onText, onThinking, onSearch, onSources }) {
   const client = await getClient(apiKey);
-  const params = {
-    model,
-    max_tokens: 64000,
-    system,
-    messages,
-    thinking: { type: "adaptive", display: deep ? "summarized" : "omitted" },
-    output_config: { effort: deep ? "high" : "low" },
-  };
-  if (FALLBACK_MODELS.has(model)) {
-    params.betas = ["server-side-fallback-2026-07-01"];
-    params.fallbacks = "default";
-  }
-
-  const stream = client.beta.messages.stream(params, { signal });
-  for await (const event of stream) {
-    if (event.type === "content_block_delta") {
-      if (event.delta.type === "text_delta") onText(event.delta.text);
-      else if (event.delta.type === "thinking_delta" && event.delta.thinking) onThinking?.(event.delta.thinking);
+  const convo = [...messages];
+  let final;
+  // A busca no servidor pode pausar o turno (pause_turn); nesse caso continuamos de onde parou.
+  for (let round = 0; round < 4; round++) {
+    const params = {
+      model,
+      max_tokens: 64000,
+      system,
+      messages: convo,
+      thinking: { type: "adaptive", display: deep ? "summarized" : "omitted" },
+      output_config: { effort: deep || search ? "high" : "low" },
+    };
+    if (search) params.tools = [webSearchTool(model)];
+    if (FALLBACK_MODELS.has(model)) {
+      params.betas = ["server-side-fallback-2026-07-01"];
+      params.fallbacks = "default";
     }
-  }
-  const final = await stream.finalMessage();
-  if (final.stop_reason === "refusal") {
-    const why = final.stop_details?.explanation;
-    throw new Error("O modelo recusou este pedido." + (why ? ` (${why})` : ""));
+
+    const stream = client.beta.messages.stream(params, { signal });
+    const queries = new Map(); // índice do bloco → json parcial da consulta
+    for await (const event of stream) {
+      if (event.type === "content_block_start") {
+        const b = event.content_block;
+        if (b.type === "server_tool_use") queries.set(event.index, "");
+        if (b.type === "web_search_tool_result" && Array.isArray(b.content)) {
+          onSources?.(b.content.filter((r) => r.type === "web_search_result").map((r) => ({ title: r.title, url: r.url })));
+        }
+      } else if (event.type === "content_block_delta") {
+        if (event.delta.type === "text_delta") onText(event.delta.text);
+        else if (event.delta.type === "thinking_delta" && event.delta.thinking) onThinking?.(event.delta.thinking);
+        else if (event.delta.type === "input_json_delta" && queries.has(event.index)) queries.set(event.index, queries.get(event.index) + event.delta.partial_json);
+      } else if (event.type === "content_block_stop" && queries.has(event.index)) {
+        try { onSearch?.(JSON.parse(queries.get(event.index) || "{}").query || ""); } catch { /* consulta incompleta */ }
+      }
+    }
+    final = await stream.finalMessage();
+    if (final.stop_reason === "refusal") {
+      const why = final.stop_details?.explanation;
+      throw new Error("O modelo recusou este pedido." + (why ? ` (${why})` : ""));
+    }
+    if (final.stop_reason !== "pause_turn") break;
+    convo.push({ role: "assistant", content: final.content });
   }
   return final;
 }

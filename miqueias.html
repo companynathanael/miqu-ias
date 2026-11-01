@@ -560,6 +560,143 @@ kbd { margin-left: auto; font-size: 10.5px; color: var(--muted); border: 1px sol
 .msg.ai.done .ai-avatar { animation: doneGlow 1.2s var(--ease); }
 @keyframes doneGlow { 30% { box-shadow: 0 0 0 6px rgba(0,229,255,.25), 0 0 30px var(--cyan-glow); border-color: var(--cyan); } }
 
+/* =========================================================
+   HABILIDADES
+   ========================================================= */
+.skills { display: flex; flex-direction: column; gap: 4px; }
+.skills .h-group { padding-top: 4px; }
+.skill-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--r); text-align: left; position: relative; overflow: hidden; transition: background .2s, box-shadow .2s; }
+.skill-item:hover { background: var(--glass-hover); }
+.skill-item.active { background: linear-gradient(120deg, rgba(0,229,255,.16), rgba(255,255,255,.04)); box-shadow: inset 0 0 0 1px rgba(0,229,255,.25), inset 0 1px 0 rgba(255,255,255,.1); }
+.skill-item b { display: block; font-weight: 500; font-size: 13.5px; }
+.skill-item small { display: block; font-size: 11.5px; color: var(--muted); }
+.sk-ic { width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; color: var(--cyan); background: rgba(0,229,255,.1); box-shadow: inset 0 0 0 1px rgba(0,229,255,.2); flex: none; }
+.sk-ic svg { width: 17px; height: 17px; }
+.skill-item.active .sk-ic { background: var(--cyan); color: #001317; box-shadow: 0 0 16px var(--cyan-glow); }
+
+/* pesquisa */
+.search-box { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); margin: 2px 0 6px; }
+.search-box svg { width: 16px; height: 16px; color: var(--cyan); }
+.search-box.live svg { animation: spin 2.4s linear infinite; }
+.search-q { list-style: none; display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.search-q li { font-size: 12px; padding: 3px 10px; border-radius: 999px; background: var(--glass-soft); border: 1px solid var(--glass-border); color: #b9d0d6; animation: blurInUp .4s var(--ease) both; }
+.sources:empty { display: none; }
+.sources { margin-top: 12px; }
+.src-head { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted-2); margin-bottom: 6px; }
+.src-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.src-list a { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px 4px 4px; border-radius: 10px; font-size: 12px; color: #cfe3e8; text-decoration: none;
+  background: linear-gradient(155deg, rgba(255,255,255,.07), rgba(255,255,255,.02)); border: 1px solid var(--glass-border); transition: border-color .2s, color .2s, transform .2s; animation: blurInUp .4s var(--ease) both; max-width: 220px; }
+.src-list a span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.src-list a:hover { border-color: rgba(0,229,255,.4); color: #fff; transform: translateY(-1px); }
+.src-list b { width: 18px; height: 18px; border-radius: 6px; display: grid; place-items: center; font-size: 10.5px; background: rgba(0,229,255,.15); color: var(--cyan); flex: none; }
+
+/* =========================================================
+   LABORATÓRIO DE TRADE
+   ========================================================= */
+#app[data-view="lab"] .chat, #app[data-view="lab"] .composer-wrap { display: none; }
+.lab { flex: 1; overflow-y: auto; padding: 4px 16px 24px; scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+.tl-wrap { max-width: 1180px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; animation: blurInUp .6s var(--ease) both; }
+.tl-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 14px; }
+.tl-head h2 { font-size: clamp(22px, 3vw, 28px); font-weight: 600; letter-spacing: -.02em; }
+.tl-head p { color: var(--muted); font-size: 13.5px; max-width: 560px; }
+.tl-head p b { color: var(--cyan); font-weight: 500; }
+.tl-tabs { display: flex; gap: 4px; padding: 4px; border-radius: var(--r); background: var(--glass-soft); border: 1px solid var(--glass-border); box-shadow: inset 0 1px 0 rgba(255,255,255,.06); flex-wrap: wrap; }
+.tl-tab { padding: 7px 14px; border-radius: 10px; font-size: 13px; color: var(--muted); transition: background .25s, color .25s; }
+.tl-tab:hover { color: var(--text); }
+.tl-tab.active { background: var(--cyan); color: #001317; font-weight: 600; box-shadow: 0 0 18px -4px var(--cyan-glow); }
+.tl-panel { display: flex; flex-direction: column; gap: 14px; animation: blurInUp .5s var(--ease) both; }
+.tl-panel[hidden] { display: none; }
+.tl-grid { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 14px; align-items: start; }
+.tl-grid.study { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); align-items: start; }
+.tl-card { border-radius: var(--r-lg); padding: 16px; min-width: 0; }
+.tl-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 10px; }
+.tl-toolbar select, .tl-auto select { font-size: 13px; padding: 7px 10px; border-radius: 10px; background: rgba(0,0,0,.4); border: 1px solid var(--glass-border); color: var(--text); outline: none; }
+.tl-toolbar select:focus, .tl-auto select:focus { border-color: var(--cyan); }
+.tl-src { font-size: 11.5px; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--glass-border); color: var(--muted); }
+.tl-src.binance { color: var(--cyan); border-color: rgba(0,229,255,.35); background: rgba(0,229,255,.08); }
+.tl-src.sintetico { color: #ffd166; border-color: rgba(255,209,102,.35); }
+.tl-legend { margin-left: auto; font-size: 11.5px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+.tl-legend i { width: 14px; height: 2px; border-radius: 2px; display: inline-block; }
+.tl-legend .l9 { background: rgba(255,255,255,.8); } .tl-legend .l21 { background: var(--cyan); margin-left: 6px; }
+.tl-chart { position: relative; height: clamp(260px, 46vh, 440px); border-radius: var(--r); overflow: hidden; background: rgba(0,6,9,.5); border: 1px solid rgba(255,255,255,.05); }
+.tl-chart canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.tl-loading { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); font-size: 13px; }
+.tl-loading[hidden] { display: none; }
+.tl-side { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.tl-account small { color: var(--muted); font-size: 12px; }
+.tl-account strong { display: block; font-size: 28px; font-weight: 600; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.tl-pill { display: inline-block; font-size: 12px; padding: 2px 9px; border-radius: 999px; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.tl-pill.up, td.up { color: var(--cyan); } .tl-pill.up { background: rgba(0,229,255,.1); }
+.tl-pill.down, td.down { color: var(--danger); } .tl-pill.down { background: rgba(255,92,122,.1); }
+.tl-account dl { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0; }
+.tl-account dt { font-size: 11px; color: var(--muted-2); text-transform: uppercase; letter-spacing: .08em; }
+.tl-account dd { font-size: 13.5px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.tl-manual { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.tl-buy { background: rgba(0,229,255,.14); border: 1px solid rgba(0,229,255,.35); color: var(--cyan); }
+.tl-buy:hover { background: rgba(0,229,255,.22); }
+.tl-sell { background: rgba(255,92,122,.1); border: 1px solid rgba(255,92,122,.3); color: var(--danger); }
+.tl-sell:hover { background: rgba(255,92,122,.18); }
+.tl-buy svg, .tl-sell svg { width: 16px; height: 16px; }
+.tl-link { display: block; margin: 10px auto 0; font-size: 12px; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }
+.tl-link:hover { color: var(--danger); }
+.tl-auto { display: flex; flex-direction: column; gap: 10px; }
+.tl-auto label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); flex: 1; min-width: 0; }
+.tl-auto select { width: 100%; }
+.tl-row { display: flex; gap: 8px; }
+.tl-auto-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+.tl-auto-head b { font-weight: 600; font-size: 14.5px; }
+.tl-auto-head small { color: var(--muted); font-size: 12px; }
+.tl-dot { width: 9px; height: 9px; border-radius: 3px; background: var(--muted-2); }
+.tl-dot.on { background: var(--cyan); box-shadow: 0 0 0 0 var(--cyan-glow); animation: pulse 1.6s infinite; }
+.tl-desc { font-size: 12.5px; color: var(--muted); }
+#tl-go.stop { background: var(--danger); box-shadow: 0 10px 30px -10px rgba(255,92,122,.6); }
+.tl-journal { list-style: none; display: flex; flex-direction: column; gap: 6px; max-height: 260px; overflow-y: auto; scrollbar-width: thin; }
+.tl-journal li { display: flex; gap: 12px; font-size: 13px; padding: 8px 10px; border-radius: 10px; background: rgba(255,255,255,.025); border-left: 2px solid var(--muted-2); animation: blurInLeft .5s var(--ease) both; }
+.tl-journal li.buy { border-left-color: var(--cyan); } .tl-journal li.win { border-left-color: #5ff6c6; } .tl-journal li.loss { border-left-color: var(--danger); }
+.tl-journal li.empty { color: var(--muted); border: 0; }
+.tl-journal time { color: var(--muted-2); font-size: 11.5px; white-space: nowrap; font-variant-numeric: tabular-nums; padding-top: 1px; }
+.st-log { list-style: none; margin: 12px 0; max-height: 150px; overflow-y: auto; font-size: 12px; color: var(--muted); display: flex; flex-direction: column; gap: 3px; }
+.st-log:empty { display: none; }
+.st-log li { animation: blurInLeft .4s var(--ease) both; }
+.st-log li::before { content: "› "; color: var(--cyan); }
+.tl-card > .btn { margin-top: 10px; }
+.tl-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 14px; font-variant-numeric: tabular-nums; }
+.tl-table th { text-align: left; font-weight: 500; font-size: 11px; color: var(--muted-2); text-transform: uppercase; letter-spacing: .06em; padding: 6px 8px; border-bottom: 1px solid var(--glass-border); }
+.tl-table td { padding: 8px; border-bottom: 1px solid rgba(255,255,255,.04); }
+.tl-table tr.best td:first-child { color: var(--cyan); font-weight: 500; }
+.tl-insights { margin: 12px 0 0 18px; font-size: 13px; color: #c6d7db; display: flex; flex-direction: column; gap: 4px; }
+.tl-insights li::marker { color: var(--cyan); }
+.tl-progress { height: 6px; border-radius: 6px; background: rgba(255,255,255,.06); overflow: hidden; margin: 8px 0 12px; }
+.tl-progress i { display: block; height: 100%; background: linear-gradient(90deg, var(--cyan-2), var(--cyan-3)); box-shadow: 0 0 12px var(--cyan); transition: width .8s var(--ease); }
+.tl-lessons { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.tl-lessons details { border-radius: 12px; background: rgba(255,255,255,.025); border: 1px solid rgba(255,255,255,.05); padding: 9px 12px; transition: border-color .2s; }
+.tl-lessons details[open] { border-color: rgba(0,229,255,.25); }
+.tl-lessons summary { display: flex; align-items: center; gap: 10px; cursor: pointer; list-style: none; font-size: 13.5px; flex-wrap: wrap; }
+.tl-lessons summary::-webkit-details-marker { display: none; }
+.tl-lessons .n { width: 22px; height: 22px; border-radius: 7px; display: grid; place-items: center; font-size: 11px; background: rgba(255,255,255,.06); color: var(--muted); flex: none; }
+.tl-lessons li.miq .n { background: var(--cyan); color: #001317; }
+.tl-lessons .tt { flex: 1; min-width: 120px; }
+.tl-lessons .tag { font-size: 10.5px; padding: 2px 8px; border-radius: 999px; background: rgba(0,229,255,.1); color: var(--cyan); }
+.tl-lessons .tag.you { background: rgba(95,246,198,.1); color: #5ff6c6; }
+.tl-lessons p { font-size: 13px; color: #b9cdd2; margin: 10px 0; }
+.tl-lesson-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.tl-lesson-actions .btn { padding: 7px 12px; font-size: 12.5px; }
+.tl-check { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--muted); cursor: pointer; }
+.tl-check input { accent-color: var(--cyan); }
+.tl-sites-intro { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.tl-sites-intro p { font-size: 13.5px; color: #c6d7db; max-width: 640px; }
+.tl-sites { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+.tl-site { display: flex; flex-direction: column; gap: 6px; padding: 16px; border-radius: var(--r-lg); color: var(--text); text-decoration: none; animation: blurInUp .6s var(--ease) both; transition: transform .3s var(--ease), border-color .3s, box-shadow .3s; }
+.tl-site:hover { transform: translateY(-3px); border-color: rgba(0,229,255,.35); box-shadow: var(--glass-shine), 0 16px 40px -18px var(--cyan-glow); }
+.tl-site b { font-weight: 600; font-size: 15px; }
+.tl-site p { font-size: 12.5px; color: var(--muted); flex: 1; }
+.tl-site-tag { font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--cyan); }
+.tl-site-url { font-size: 12px; color: var(--cyan-3); }
+.tl-fine { font-size: 12px; color: var(--muted-2); text-align: center; }
+@media (max-width: 980px) {
+  .tl-grid, .tl-grid.study { grid-template-columns: minmax(0, 1fr); }
+}
+
 /* telas baixas (notebooks, janelas pequenas) */
 @media (max-height: 720px) {
   .welcome { padding: 8px 0; gap: 4px; }
@@ -711,6 +848,18 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
         <input id="search" type="search" placeholder="Buscar conversas" />
       </div>
 
+      <nav class="skills" id="skills" aria-label="Habilidades">
+        <div class="h-group">Habilidades</div>
+        <button class="skill-item" data-skill="research">
+          <span class="sk-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></span>
+          <span><b>Pesquisa</b><small>Busca na web com fontes</small></span>
+        </button>
+        <button class="skill-item" data-skill="trade">
+          <span class="sk-ic"><svg viewBox="0 0 24 24"><path d="M4 19V5M4 19h16"/><path d="m7 15 4-4 3 3 5-6"/></svg></span>
+          <span><b>Laboratório de Trade</b><small>Estuda e pratica com dinheiro fictício</small></span>
+        </button>
+      </nav>
+
       <nav class="history" id="history" aria-label="Histórico"></nav>
 
       <div class="side-foot">
@@ -770,6 +919,8 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
         <div class="messages" id="messages" aria-live="polite"></div>
       </div>
 
+      <section class="lab hidden" id="lab" aria-label="Laboratório de Trade"></section>
+
       <div class="composer-wrap">
         <button class="scroll-down" id="scroll-down" aria-label="Rolar para o fim">
           <svg viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6"/></svg>
@@ -783,6 +934,10 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
                 <input type="file" id="file" hidden accept=".txt,.md,.js,.ts,.py,.json,.csv,.html,.css" />
                 <svg viewBox="0 0 24 24"><path d="m21 11-8.5 8.5a5 5 0 0 1-7-7L14 4a3.5 3.5 0 0 1 5 5l-8.5 8.5a2 2 0 0 1-3-3L15 7"/></svg>
               </label>
+              <button type="button" class="chip-toggle" id="search-toggle" aria-pressed="false">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>
+                Pesquisa na web
+              </button>
               <button type="button" class="chip-toggle" id="think-toggle" aria-pressed="false">
                 <svg viewBox="0 0 24 24"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2Z"/></svg>
                 Raciocínio profundo
@@ -1411,6 +1566,755 @@ function easeOut(k) { return 1 - Math.pow(1 - k, 3); }
 function easeIn(k) { return k * k * k; }
 function easeInOut(k) { return k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2; }
 
+// Laboratório de Trade do Miquéias: estudo e prática com dinheiro fictício.
+// Tudo fica dentro de createTradeLab para não colidir com nomes do app no arquivo único.
+function createTradeLab({ root, toast, askChat, research, store }) {
+  /* =========================================================
+     Constantes
+     ========================================================= */
+  const SYMBOLS = [
+    { id: "BTCUSDT", short: "BTC", name: "Bitcoin", base: 60000 },
+    { id: "ETHUSDT", short: "ETH", name: "Ethereum", base: 3000 },
+    { id: "SOLUSDT", short: "SOL", name: "Solana", base: 150 },
+  ];
+  const INTERVALS = [
+    { id: "15m", label: "15 min", ms: 9e5 },
+    { id: "1h", label: "1 hora", ms: 36e5 },
+    { id: "4h", label: "4 horas", ms: 144e5 },
+    { id: "1d", label: "1 dia", ms: 864e5 },
+  ];
+  const START_CASH = 10000;
+  const FEE = 0.001; // 0,1% por operação, como em corretoras de cripto
+  const STOP = 0.04;
+  const TARGET = 0.08;
+  const ALLOC = 0.5; // usa metade do patrimônio por operação
+
+  const STRATEGIES = [
+    {
+      id: "cruzamento", name: "Cruzamento de médias (EMA 9/21)", lesson: "medias",
+      desc: "Compra quando a média rápida cruza acima da lenta; vende no cruzamento contrário.",
+      signal(i, d, pos) {
+        const up = d.ema9[i - 1] <= d.ema21[i - 1] && d.ema9[i] > d.ema21[i];
+        const down = d.ema9[i - 1] >= d.ema21[i - 1] && d.ema9[i] < d.ema21[i];
+        if (!pos && up) return { side: "buy", reason: "A EMA 9 cruzou acima da EMA 21: sinal de tendência de alta." };
+        if (pos && down) return { side: "sell", reason: "A EMA 9 cruzou abaixo da EMA 21: a alta perdeu força." };
+        return null;
+      },
+    },
+    {
+      id: "rsi", name: "Reversão por RSI (30/70)", lesson: "rsi",
+      desc: "Compra quando o RSI sai da sobrevenda (30); vende quando chega à sobrecompra (70).",
+      signal(i, d, pos) {
+        if (!pos && d.rsi[i - 1] < 30 && d.rsi[i] >= 30) return { side: "buy", reason: `O RSI saiu da sobrevenda (${d.rsi[i].toFixed(0)}): possível repique.` };
+        if (pos && d.rsi[i] >= 70) return { side: "sell", reason: `O RSI chegou a ${d.rsi[i].toFixed(0)} (sobrecompra): realizei o lucro.` };
+        return null;
+      },
+    },
+    {
+      id: "rompimento", name: "Rompimento de canal (Donchian 20/10)", lesson: "rompimento",
+      desc: "Compra quando o preço fecha acima da máxima de 20 velas; vende abaixo da mínima de 10.",
+      signal(i, d, pos) {
+        if (!pos && d.c[i] > d.hi20[i]) return { side: "buy", reason: "O preço fechou acima da máxima das últimas 20 velas: rompimento." };
+        if (pos && d.c[i] < d.lo10[i]) return { side: "sell", reason: "O preço perdeu a mínima das últimas 10 velas: saída do rompimento." };
+        return null;
+      },
+    },
+  ];
+
+  const LESSONS = [
+    { id: "basico", t: "O que é trading (e o que não é)", s: "Trading é comprar e vender em prazos curtos buscando lucrar com a variação do preço. Não é renda garantida: a maioria dos iniciantes perde dinheiro, por isso se pratica primeiro com dinheiro fictício." },
+    { id: "velas", t: "Lendo candles", s: "Cada vela mostra abertura, máxima, mínima e fechamento de um período. Corpo ciano: fechou acima da abertura (alta). Corpo vermelho: fechou abaixo (baixa). Os pavios mostram até onde o preço foi." },
+    { id: "tendencia", t: "Tendência, suporte e resistência", s: "Topos e fundos cada vez mais altos indicam alta; mais baixos, queda. Suporte é onde o preço costuma parar de cair; resistência, onde costuma parar de subir." },
+    { id: "medias", t: "Médias móveis (EMA e SMA)", s: "A média móvel suaviza o preço. A exponencial (EMA) dá mais peso às velas recentes. Quando a média curta cruza a longa, muitos traders leem uma mudança de tendência." },
+    { id: "rsi", t: "RSI e momentum", s: "O RSI vai de 0 a 100 e mede a força dos movimentos recentes. Abaixo de 30 costuma indicar sobrevenda; acima de 70, sobrecompra. Em tendências fortes ele pode ficar nos extremos por muito tempo." },
+    { id: "rompimento", t: "Rompimentos de canal", s: "O canal de Donchian marca a máxima e a mínima de N velas. Um fechamento acima da máxima sugere início de movimento; muitos rompimentos falham, por isso o stop é essencial." },
+    { id: "risco", t: "Gestão de risco", s: "Defina antes da entrada onde sair no prejuízo (stop) e no lucro (alvo). Arrisque só uma pequena parte do capital por operação. Um alvo duas vezes maior que o stop permite lucrar mesmo acertando menos da metade." },
+    { id: "backtest", t: "Backtest: testar antes de arriscar", s: "Backtest é aplicar uma estratégia aos preços do passado para ver como ela teria ido. Resultado passado não garante o futuro, mas descarta ideias ruins sem custo." },
+    { id: "psicologia", t: "Psicologia e diário de trade", s: "Medo e ganância levam a quebrar as próprias regras. Anotar o motivo de cada entrada e saída num diário mostra os erros que se repetem." },
+    { id: "simuladores", t: "Praticar em simuladores", s: "Simuladores e contas demo (paper trading) usam dinheiro virtual com preços reais. São o lugar para errar barato antes de pensar em dinheiro de verdade." },
+  ];
+
+  // Conferidos por pesquisa em nov/2026. Termos e disponibilidade podem mudar.
+  const SITES = [
+    { name: "TradingView", url: "https://www.tradingview.com", tag: "Ações · Cripto · Forex", note: "Conta de papel (Paper Trading) com dinheiro virtual, operando direto nos gráficos. Conta grátis." },
+    { name: "Investopedia Simulator", url: "https://www.investopedia.com/simulator/", tag: "Ações · ETFs · Opções · Cripto", note: "Simulador grátis com login. O de cripto funciona 24 horas por dia." },
+    { name: "Binance Spot Testnet", url: "https://testnet.binance.vision", tag: "Cripto · API", note: "Rede de testes oficial da Binance com saldo fictício. Login pelo GitHub e chaves de API: ideal para robôs como o Miquéias." },
+    { name: "Webull Paper Trading", url: "https://www.webull.com", tag: "Ações · Opções", note: "Saldo virtual para iniciantes, no app e na web." },
+    { name: "Interactive Brokers (conta paper)", url: "https://www.interactivebrokers.com", tag: "Mercados globais", note: "Conta de simulação com US$ 1 milhão virtual. Exige cadastro gratuito na corretora." },
+    { name: "eToro (portfólio virtual)", url: "https://www.etoro.com", tag: "Ações · Cripto", note: "Portfólio virtual; para cripto não pede dados pessoais." },
+    { name: "Crypto Parrot", url: "https://cryptoparrot.com", tag: "Cripto", note: "Simulador de cripto com US$ 100 mil em dinheiro fictício." },
+    { name: "ADVFN Simulador", url: "https://br.advfn.com/simulador", tag: "Brasil · B3", note: "Simulador brasileiro com dinheiro fictício. Confira se continua ativo." },
+    { name: "TradeMap", url: "https://trademap.com.br", tag: "Brasil · B3", note: "App brasileiro que já ofereceu simulação na B3. Confira se o recurso continua disponível." },
+    { name: "B3 Educação", url: "https://edu.b3.com.br", tag: "Cursos · Brasil", note: "Cursos gratuitos e oficiais da bolsa brasileira." },
+  ];
+
+  /* =========================================================
+     Estado persistido
+     ========================================================= */
+  const KEY = "miq.trade";
+  const fresh = () => ({ cash: START_CASH, start: START_CASH, pos: null, closed: [], journal: [], lessons: {}, studies: [], equityHist: [] });
+  let S = { ...fresh(), ...store.get(KEY, {}) };
+  const save = () => store.set(KEY, S);
+
+  let market = { symbol: "BTCUSDT", interval: "1h", candles: [], source: "", ind: null };
+  let cursor = 0; // última vela visível (no treino acelerado anda aos poucos)
+  let auto = { on: false, mode: "replay", strategy: "cruzamento", speed: 6, timer: null, live: null };
+  let studying = false;
+  let tab = "sim";
+
+  /* =========================================================
+     Utilidades
+     ========================================================= */
+  const q = (s) => root.querySelector(s);
+  const qa = (s) => [...root.querySelectorAll(s)];
+  const money = (v) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "USD" }).format(v);
+  const pct = (v) => `${v >= 0 ? "+" : ""}${(v * 100).toFixed(2)}%`;
+  const priceFmt = (v) => v >= 1000 ? v.toLocaleString("pt-BR", { maximumFractionDigits: 0 }) : v.toLocaleString("pt-BR", { maximumFractionDigits: 2 });
+  const sym = (id) => SYMBOLS.find((s) => s.id === id);
+  const strat = (id) => STRATEGIES.find((s) => s.id === id);
+  const timeFmt = (t) => new Date(t).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+  /* =========================================================
+     Dados de mercado: Binance (público) com reserva sintética
+     ========================================================= */
+  async function fetchCandles(symbol, interval, limit = 320) {
+    try {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 7000);
+      const r = await fetch(`https://data-api.binance.vision/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`, { signal: ctrl.signal });
+      clearTimeout(t);
+      if (!r.ok) throw new Error(r.status);
+      const rows = await r.json();
+      return { source: "binance", candles: rows.map((k) => ({ t: k[0], o: +k[1], h: +k[2], l: +k[3], c: +k[4], v: +k[5] })) };
+    } catch {
+      return { source: "sintetico", candles: synthetic(symbol, interval, limit) };
+    }
+  }
+
+  // Mercado sintético: passeio aleatório com fases de tendência e volatilidade (semente fixa por ativo)
+  function synthetic(symbol, interval, n) {
+    let seed = [...(symbol + interval)].reduce((a, c) => a * 31 + c.charCodeAt(0), 7) >>> 0;
+    const rnd = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296);
+    const gauss = () => Math.sqrt(-2 * Math.log(rnd() + 1e-12)) * Math.cos(2 * Math.PI * rnd());
+    const step = INTERVALS.find((i) => i.id === interval).ms;
+    let p = sym(symbol).base, drift = 0, vol = 0.012;
+    const now = Math.floor(Date.now() / step) * step;
+    const out = [];
+    for (let i = 0; i < n; i++) {
+      if (i % 40 === 0) { drift = (rnd() - 0.48) * 0.006; vol = 0.006 + rnd() * 0.018; }
+      const o = p;
+      const c = o * Math.exp(drift + vol * gauss());
+      const h = Math.max(o, c) * (1 + Math.abs(gauss()) * vol * 0.5);
+      const l = Math.min(o, c) * (1 - Math.abs(gauss()) * vol * 0.5);
+      out.push({ t: now - (n - 1 - i) * step, o, h, l, c, v: 0 });
+      p = c;
+    }
+    return out;
+  }
+
+  /* =========================================================
+     Indicadores
+     ========================================================= */
+  function ema(v, n) {
+    const k = 2 / (n + 1), out = [];
+    v.forEach((x, i) => out.push(i === 0 ? x : x * k + out[i - 1] * (1 - k)));
+    return out;
+  }
+  function rsi(v, n = 14) {
+    const out = Array(v.length).fill(50);
+    let g = 0, l = 0;
+    for (let i = 1; i < v.length; i++) {
+      const d = v[i] - v[i - 1];
+      const up = Math.max(d, 0), dn = Math.max(-d, 0);
+      if (i <= n) { g += up / n; l += dn / n; } else { g = (g * (n - 1) + up) / n; l = (l * (n - 1) + dn) / n; }
+      if (i >= n) out[i] = l === 0 ? 100 : 100 - 100 / (1 + g / l);
+    }
+    return out;
+  }
+  const channel = (cs, n, fn, key) => cs.map((_, i) => (i < n ? (key === "h" ? Infinity : -Infinity) : fn(...cs.slice(i - n, i).map((x) => x[key]))));
+  function indicators(cs) {
+    const c = cs.map((x) => x.c);
+    return { c, ema9: ema(c, 9), ema21: ema(c, 21), rsi: rsi(c), hi20: channel(cs, 20, Math.max, "h"), lo10: channel(cs, 10, Math.min, "l") };
+  }
+
+  /* =========================================================
+     Motor de simulação (backtest)
+     ========================================================= */
+  function exitByRisk(price, pos) {
+    if (price <= pos.entry * (1 - STOP)) return { side: "sell", reason: `Stop-loss de ${STOP * 100}% acionado: protegi o capital.` };
+    if (price >= pos.entry * (1 + TARGET)) return { side: "sell", reason: `Alvo de ${TARGET * 100}% atingido: lucro realizado.` };
+    return null;
+  }
+
+  function backtest(cs, s) {
+    const d = indicators(cs);
+    let cash = START_CASH, pos = null, peak = START_CASH, maxDD = 0;
+    const trades = [], equity = [];
+    for (let i = 30; i < cs.length; i++) {
+      const price = cs[i].c;
+      const sig = (pos && exitByRisk(price, pos)) || s.signal(i, d, pos);
+      if (sig?.side === "buy" && !pos) {
+        const use = cash * ALLOC; // sem posição, o patrimônio é o caixa
+        pos = { qty: (use * (1 - FEE)) / price, entry: price, cost: use };
+        cash -= use;
+      } else if (sig?.side === "sell" && pos) {
+        const got = pos.qty * price * (1 - FEE);
+        trades.push({ pnl: got - pos.cost, ret: got / pos.cost - 1 });
+        cash += got; pos = null;
+      }
+      const eq = cash + (pos ? pos.qty * price : 0);
+      equity.push(eq);
+      peak = Math.max(peak, eq);
+      maxDD = Math.max(maxDD, 1 - eq / peak);
+    }
+    const end = equity.at(-1) ?? START_CASH;
+    const wins = trades.filter((t) => t.pnl > 0);
+    const grossWin = wins.reduce((a, t) => a + t.pnl, 0);
+    const grossLoss = -trades.filter((t) => t.pnl <= 0).reduce((a, t) => a + t.pnl, 0);
+    return {
+      ret: end / START_CASH - 1,
+      hold: cs.at(-1).c / cs[30].c - 1,
+      trades: trades.length,
+      win: trades.length ? wins.length / trades.length : 0,
+      dd: maxDD,
+      pf: grossLoss ? grossWin / grossLoss : grossWin ? Infinity : 0,
+      equity,
+    };
+  }
+
+  /* =========================================================
+     Conta fictícia (paper trading)
+     ========================================================= */
+  const price = () => market.candles[cursor]?.c ?? S.pos?.last ?? 0;
+  const equity = () => S.cash + (S.pos && S.pos.symbol === market.symbol ? S.pos.qty * price() : S.pos ? S.pos.qty * S.pos.last : 0);
+
+  function log(text, kind = "info") {
+    S.journal.unshift({ t: Date.now(), text, kind });
+    S.journal = S.journal.slice(0, 120);
+    if (S.journal.length >= 5) learn("psicologia");
+    save();
+    renderJournal();
+  }
+
+  function learn(id) {
+    if (S.lessons[id]?.miq) return;
+    S.lessons[id] = { ...(S.lessons[id] || {}), miq: Date.now() };
+    save();
+    if (tab === "study") renderStudy();
+  }
+
+  function buy(reason, who = "Miquéias") {
+    if (S.pos) { if (who === "Você") toast("Já existe uma posição aberta. Venda antes de comprar de novo."); return false; }
+    const p = price();
+    const use = Math.min(S.cash, equity() * ALLOC);
+    if (use < 10) { toast("Saldo fictício insuficiente."); return false; }
+    S.pos = { symbol: market.symbol, qty: (use * (1 - FEE)) / p, entry: p, cost: use, last: p, t: market.candles[cursor].t };
+    S.cash -= use;
+    log(`${who} comprou ${sym(market.symbol).short} a ${priceFmt(p)} (${money(use)}). ${reason}`, "buy");
+    marks.push({ i: cursor, side: "buy" });
+    learn("risco");
+    save();
+    return true;
+  }
+
+  function sell(reason, who = "Miquéias") {
+    if (!S.pos) { if (who === "Você") toast("Não há posição aberta para vender."); return false; }
+    if (S.pos.symbol !== market.symbol) { toast(`A posição aberta é de ${sym(S.pos.symbol).short}. Troque o ativo para vender.`); return false; }
+    const p = price();
+    const got = S.pos.qty * p * (1 - FEE);
+    const pnl = got - S.pos.cost;
+    S.closed.unshift({ symbol: S.pos.symbol, entry: S.pos.entry, exit: p, pnl, ret: got / S.pos.cost - 1, t: Date.now() });
+    S.closed = S.closed.slice(0, 200);
+    S.cash += got;
+    S.pos = null;
+    log(`${who} vendeu a ${priceFmt(p)}: ${pnl >= 0 ? "lucro" : "prejuízo"} de ${money(Math.abs(pnl))} (${pct(got / (got - pnl) - 1)}). ${reason}`, pnl >= 0 ? "win" : "loss");
+    marks.push({ i: cursor, side: "sell" });
+    save();
+    return true;
+  }
+
+  function resetAccount() {
+    stopAuto();
+    const keep = { lessons: S.lessons, studies: S.studies };
+    S = { ...fresh(), ...keep };
+    marks = [];
+    save();
+    log("Conta fictícia zerada: US$ 10.000 para começar de novo.");
+    renderAll();
+  }
+
+  /* =========================================================
+     Piloto automático
+     ========================================================= */
+  let marks = [];
+
+  function tick() {
+    const s = strat(auto.strategy);
+    const d = market.ind;
+    if (S.pos) S.pos.last = price();
+    const sig = (S.pos && S.pos.symbol === market.symbol && exitByRisk(price(), S.pos)) || (cursor >= 30 ? s.signal(cursor, d, S.pos && S.pos.symbol === market.symbol ? S.pos : null) : null);
+    if (sig?.side === "buy" && !S.pos) buy(sig.reason);
+    if (sig?.side === "sell" && S.pos?.symbol === market.symbol) sell(sig.reason);
+    S.equityHist.push(equity());
+    S.equityHist = S.equityHist.slice(-300);
+  }
+
+  function startAuto() {
+    if (!market.candles.length) return;
+    auto.on = true;
+    const s = strat(auto.strategy);
+    learn(s.lesson);
+    if (auto.mode === "replay") {
+      cursor = Math.min(60, market.candles.length - 1);
+      marks = [];
+      log(`Treino acelerado iniciado com "${s.name}" em ${sym(market.symbol).short} (${market.candles.length - cursor} velas).`);
+      const run = () => {
+        if (!auto.on) return;
+        if (cursor >= market.candles.length - 1) {
+          const r = equity() / START_CASH - 1;
+          log(`Treino acelerado concluído. Patrimônio: ${money(equity())} (${pct(r)} desde o início da conta).`, r >= 0 ? "win" : "loss");
+          stopAuto();
+          return;
+        }
+        cursor++;
+        tick();
+        drawChart();
+        renderAccount();
+        auto.timer = setTimeout(run, 1000 / auto.speed);
+      };
+      run();
+    } else {
+      cursor = market.candles.length - 1;
+      log(`Modo ao vivo ligado com "${s.name}" em ${sym(market.symbol).short}. Vou checar o preço a cada 20 segundos.`);
+      if (market.source !== "binance") log("Sem conexão com a Binance: o modo ao vivo está usando o mercado sintético, que não se move. Use o treino acelerado.", "loss");
+      const poll = async () => {
+        if (!auto.on) return;
+        const r = await fetchCandles(market.symbol, market.interval, 2);
+        if (r.source === "binance") {
+          const lastT = market.candles.at(-1).t;
+          r.candles.forEach((c) => { if (c.t === lastT) market.candles[market.candles.length - 1] = c; else if (c.t > lastT) market.candles.push(c); });
+          market.ind = indicators(market.candles);
+          cursor = market.candles.length - 1;
+          tick();
+          drawChart();
+          renderAccount();
+        }
+        auto.live = setTimeout(poll, 20000);
+      };
+      tick();
+      poll();
+    }
+    renderAuto();
+  }
+
+  function stopAuto() {
+    auto.on = false;
+    clearTimeout(auto.timer);
+    clearTimeout(auto.live);
+    renderAuto();
+  }
+
+  /* =========================================================
+     Estudo: o Miquéias testa todas as estratégias em todos os ativos
+     ========================================================= */
+  async function study({ silent = false } = {}) {
+    if (studying) throw Object.assign(new Error("O Miquéias já está estudando."), { code: "busy" });
+    studying = true;
+    if (!silent) { tab = "study"; renderTabs(); }
+    renderStudy();
+    const logEl = q(".st-log");
+    const line = (t) => { if (logEl) { const li = document.createElement("li"); li.textContent = t; logEl.append(li); logEl.scrollTop = logEl.scrollHeight; } };
+    const rows = [];
+    let src = "binance";
+    ["basico", "velas", "tendencia"].forEach(learn);
+    try {
+      for (const s of SYMBOLS) {
+        for (const iv of ["1h", "4h"]) {
+          line(`Baixando ${s.short} em velas de ${iv}…`);
+          const data = await fetchCandles(s.id, iv, 500);
+          if (data.source !== "binance") src = "sintetico";
+          for (const st of STRATEGIES) {
+            const r = backtest(data.candles, st);
+            rows.push({ symbol: s.short, interval: iv, strategy: st.id, ...r, equity: undefined });
+            line(`${st.name.split(" (")[0]} em ${s.short} ${iv}: ${pct(r.ret)} (${r.trades} operações)`);
+            learn(st.lesson);
+            await new Promise((ok) => setTimeout(ok, 90));
+          }
+        }
+      }
+      learn("backtest");
+      const byStrat = STRATEGIES.map((st) => {
+        const rs = rows.filter((r) => r.strategy === st.id);
+        const avg = rs.reduce((a, r) => a + r.ret, 0) / rs.length;
+        const beat = rs.filter((r) => r.ret > r.hold).length;
+        const win = rs.reduce((a, r) => a + r.win, 0) / rs.length;
+        return { id: st.id, name: st.name, avg, beat, n: rs.length, win };
+      }).sort((a, b) => b.avg - a.avg);
+      const best = rows.reduce((a, r) => (r.ret > a.ret ? r : a), rows[0]);
+      const insights = [
+        `Melhor estratégia na média: ${byStrat[0].name}, com ${pct(byStrat[0].avg)} por teste.`,
+        `Melhor teste isolado: ${strat(best.strategy).name.split(" (")[0]} em ${best.symbol} ${best.interval} (${pct(best.ret)}).`,
+        `${byStrat[0].name.split(" (")[0]} superou o "comprar e segurar" em ${byStrat[0].beat} de ${byStrat[0].n} mercados.`,
+        byStrat.every((b) => b.avg < 0) ? "Nenhuma estratégia lucrou na média neste período: hora de ficar de fora ou ajustar parâmetros." : "Com stop de 4% e alvo de 8%, dá para lucrar mesmo acertando menos da metade das operações.",
+      ];
+      const studyRec = { t: Date.now(), source: src, ranking: byStrat, rows, insights };
+      S.studies.unshift(studyRec);
+      S.studies = S.studies.slice(0, 6);
+      auto.strategy = byStrat[0].id;
+      save();
+      log(`Estudo concluído (${rows.length} testes${src === "sintetico" ? ", com mercado sintético" : ""}). ${insights[0]} Ajustei o piloto automático para ela.`, "win");
+      return studyRec;
+    } finally {
+      studying = false;
+      renderStudy();
+      renderAuto();
+    }
+  }
+
+  /* =========================================================
+     Gráfico
+     ========================================================= */
+  function drawChart() {
+    const cv = q(".tl-chart canvas");
+    if (!cv || !market.candles.length) return;
+    const box = cv.parentElement.getBoundingClientRect();
+    const dpr = Math.min(devicePixelRatio || 1, 2);
+    cv.width = box.width * dpr; cv.height = box.height * dpr;
+    const ctx = cv.getContext("2d");
+    ctx.scale(dpr, dpr);
+    const W = box.width, H = box.height, padR = 64, padT = 14, padB = 22;
+    const visible = Math.max(40, Math.min(120, Math.floor((W - padR) / 7)));
+    const end = cursor + 1, start = Math.max(0, end - visible);
+    const cs = market.candles.slice(start, end);
+    const d = market.ind;
+    let hi = -Infinity, lo = Infinity;
+    cs.forEach((c) => { hi = Math.max(hi, c.h); lo = Math.min(lo, c.l); });
+    const pad = (hi - lo) * 0.08; hi += pad; lo -= pad;
+    const y = (v) => padT + (1 - (v - lo) / (hi - lo)) * (H - padT - padB);
+    const cw = (W - padR) / visible;
+    const x = (i) => (i - start) * cw + cw / 2;
+
+    // grade
+    ctx.strokeStyle = "rgba(255,255,255,.05)"; ctx.lineWidth = 1;
+    ctx.fillStyle = "rgba(200,230,235,.55)"; ctx.font = "11px Sora, sans-serif"; ctx.textAlign = "left";
+    for (let k = 0; k <= 4; k++) {
+      const v = lo + ((hi - lo) * k) / 4, yy = y(v);
+      ctx.beginPath(); ctx.moveTo(0, yy); ctx.lineTo(W - padR, yy); ctx.stroke();
+      ctx.fillText(priceFmt(v), W - padR + 8, yy + 4);
+    }
+    // velas
+    cs.forEach((c, k) => {
+      const i = start + k, up = c.c >= c.o;
+      ctx.strokeStyle = ctx.fillStyle = up ? "#00e5ff" : "#ff5c7a";
+      ctx.beginPath(); ctx.moveTo(x(i), y(c.h)); ctx.lineTo(x(i), y(c.l)); ctx.stroke();
+      const top = y(Math.max(c.o, c.c)), hgt = Math.max(1, Math.abs(y(c.o) - y(c.c)));
+      ctx.globalAlpha = up ? 0.9 : 0.85;
+      ctx.fillRect(x(i) - cw * 0.32, top, cw * 0.64, hgt);
+      ctx.globalAlpha = 1;
+    });
+    // médias
+    const line = (arr, color) => {
+      ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.beginPath();
+      for (let i = start; i < end; i++) i === start ? ctx.moveTo(x(i), y(arr[i])) : ctx.lineTo(x(i), y(arr[i]));
+      ctx.stroke();
+    };
+    line(d.ema9, "rgba(255,255,255,.75)");
+    line(d.ema21, "rgba(0,229,255,.55)");
+    // marcas de compra e venda
+    marks.filter((m) => m.i >= start && m.i < end).forEach((m) => {
+      const c = market.candles[m.i], buyM = m.side === "buy";
+      const yy = buyM ? y(c.l) + 12 : y(c.h) - 12;
+      ctx.fillStyle = buyM ? "#00e5ff" : "#ff5c7a";
+      ctx.shadowColor = ctx.fillStyle; ctx.shadowBlur = 10;
+      ctx.beginPath();
+      if (buyM) { ctx.moveTo(x(m.i), yy - 6); ctx.lineTo(x(m.i) - 5, yy + 3); ctx.lineTo(x(m.i) + 5, yy + 3); }
+      else { ctx.moveTo(x(m.i), yy + 6); ctx.lineTo(x(m.i) - 5, yy - 3); ctx.lineTo(x(m.i) + 5, yy - 3); }
+      ctx.fill(); ctx.shadowBlur = 0;
+    });
+    // preço atual
+    const last = market.candles[cursor];
+    const ly = y(last.c);
+    ctx.setLineDash([4, 4]); ctx.strokeStyle = "rgba(0,229,255,.6)";
+    ctx.beginPath(); ctx.moveTo(0, ly); ctx.lineTo(W - padR, ly); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = "#00e5ff";
+    ctx.beginPath(); ctx.roundRect(W - padR + 2, ly - 10, padR - 4, 20, 6); ctx.fill();
+    ctx.fillStyle = "#001317"; ctx.font = "600 11px Sora, sans-serif";
+    ctx.fillText(priceFmt(last.c), W - padR + 7, ly + 4);
+    // data da vela
+    ctx.fillStyle = "rgba(200,230,235,.45)"; ctx.font = "10.5px Sora, sans-serif";
+    ctx.fillText(timeFmt(last.t), 6, H - 6);
+  }
+
+  /* =========================================================
+     Interface
+     ========================================================= */
+  const ICON_UP = '<svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+  const ICON_DN = '<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg>';
+
+  root.innerHTML = `
+    <div class="tl-wrap">
+      <header class="tl-head">
+        <div>
+          <h2>Laboratório de Trade</h2>
+          <p>O Miquéias estuda e pratica trading com <b>dinheiro fictício</b>. Nada aqui é recomendação de investimento.</p>
+        </div>
+        <div class="tl-tabs" role="tablist">
+          <button class="tl-tab" data-tab="sim" role="tab">Simulador</button>
+          <button class="tl-tab" data-tab="study" role="tab">Estudos</button>
+          <button class="tl-tab" data-tab="sites" role="tab">Simuladores na web</button>
+        </div>
+      </header>
+
+      <section class="tl-panel" data-panel="sim">
+        <div class="tl-grid">
+          <div class="tl-card glass tl-chart-card">
+            <div class="tl-toolbar">
+              <select id="tl-symbol" aria-label="Ativo">${SYMBOLS.map((s) => `<option value="${s.id}">${s.short}/USDT · ${s.name}</option>`).join("")}</select>
+              <select id="tl-interval" aria-label="Tempo gráfico">${INTERVALS.map((i) => `<option value="${i.id}">${i.label}</option>`).join("")}</select>
+              <span class="tl-src" id="tl-src"></span>
+              <span class="tl-legend"><i class="l9"></i>EMA 9 <i class="l21"></i>EMA 21</span>
+            </div>
+            <div class="tl-chart"><canvas aria-label="Gráfico de velas"></canvas><div class="tl-loading">Carregando preços…</div></div>
+          </div>
+
+          <div class="tl-side">
+            <div class="tl-card glass tl-account">
+              <small>Patrimônio fictício</small>
+              <strong id="tl-equity">—</strong>
+              <span id="tl-pnl" class="tl-pill">—</span>
+              <dl>
+                <div><dt>Caixa</dt><dd id="tl-cash">—</dd></div>
+                <div><dt>Posição</dt><dd id="tl-pos">Nenhuma</dd></div>
+                <div><dt>Operações</dt><dd id="tl-count">0</dd></div>
+                <div><dt>Acertos</dt><dd id="tl-win">—</dd></div>
+              </dl>
+              <div class="tl-manual">
+                <button class="btn tl-buy" id="tl-buy">${ICON_UP}Comprar</button>
+                <button class="btn tl-sell" id="tl-sell">${ICON_DN}Vender</button>
+              </div>
+              <button class="tl-link" id="tl-reset">Zerar conta fictícia</button>
+            </div>
+
+            <div class="tl-card glass tl-auto">
+              <div class="tl-auto-head"><b>Piloto automático</b><span class="tl-dot" id="tl-dot"></span></div>
+              <label>Estratégia<select id="tl-strategy">${STRATEGIES.map((s) => `<option value="${s.id}">${s.name}</option>`).join("")}</select></label>
+              <p class="tl-desc" id="tl-sdesc"></p>
+              <div class="tl-row">
+                <label>Modo<select id="tl-mode"><option value="replay">Treino acelerado</option><option value="live">Ao vivo</option></select></label>
+                <label>Velocidade<select id="tl-speed"><option value="3">Calma</option><option value="6" selected>Normal</option><option value="16">Turbo</option></select></label>
+              </div>
+              <button class="btn primary block" id="tl-go">Miquéias, opere</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="tl-card glass tl-journal-card">
+          <div class="tl-auto-head"><b>Diário do Miquéias</b><small>Cada entrada e saída com o motivo</small></div>
+          <ol class="tl-journal" id="tl-journal"></ol>
+        </div>
+      </section>
+
+      <section class="tl-panel" data-panel="study" hidden></section>
+
+      <section class="tl-panel" data-panel="sites" hidden>
+        <div class="tl-card glass tl-sites-intro">
+          <p>Simuladores para praticar com dinheiro virtual. O Miquéias já usa os preços públicos da Binance no simulador dele; nos sites abaixo quem opera é você, com sua própria conta.</p>
+          <button class="btn primary" id="tl-research-sites">Miquéias, pesquise mais simuladores</button>
+        </div>
+        <div class="tl-sites">${SITES.map((s, i) => `
+          <a class="tl-site glass" href="${s.url}" target="_blank" rel="noopener noreferrer" style="animation-delay:${i * 0.04}s">
+            <span class="tl-site-tag">${esc(s.tag)}</span>
+            <b>${esc(s.name)}</b>
+            <p>${esc(s.note)}</p>
+            <span class="tl-site-url">${esc(s.url.replace(/^https:\/\//, ""))} ↗</span>
+          </a>`).join("")}
+        </div>
+        <p class="tl-fine">Lista conferida por pesquisa em novembro de 2026. Saldos e regras de cada site podem mudar.</p>
+      </section>
+    </div>`;
+
+  function renderTabs() {
+    qa(".tl-tab").forEach((b) => { b.classList.toggle("active", b.dataset.tab === tab); b.setAttribute("aria-selected", b.dataset.tab === tab); });
+    qa(".tl-panel").forEach((p) => (p.hidden = p.dataset.panel !== tab));
+    if (tab === "study") renderStudy();
+    if (tab === "sim") requestAnimationFrame(drawChart);
+    if (tab === "sites") learn("simuladores");
+  }
+
+  function renderAccount() {
+    const eq = equity(), r = eq / S.start - 1;
+    q("#tl-equity").textContent = money(eq);
+    const pill = q("#tl-pnl");
+    pill.textContent = `${pct(r)} desde o início`;
+    pill.className = `tl-pill ${r >= 0 ? "up" : "down"}`;
+    q("#tl-cash").textContent = money(S.cash);
+    q("#tl-pos").textContent = S.pos ? `${(+S.pos.qty.toFixed(5)).toLocaleString("pt-BR")} ${sym(S.pos.symbol).short} @ ${priceFmt(S.pos.entry)}` : "Nenhuma";
+    q("#tl-count").textContent = S.closed.length;
+    const wins = S.closed.filter((c) => c.pnl > 0).length;
+    q("#tl-win").textContent = S.closed.length ? `${Math.round((wins / S.closed.length) * 100)}%` : "—";
+  }
+
+  function renderAuto() {
+    const s = strat(auto.strategy);
+    const sel = q("#tl-strategy");
+    if (sel) sel.value = auto.strategy;
+    q("#tl-sdesc").textContent = s.desc;
+    q("#tl-mode").value = auto.mode;
+    const go = q("#tl-go");
+    go.textContent = auto.on ? "Parar o Miquéias" : "Miquéias, opere";
+    go.classList.toggle("stop", auto.on);
+    q("#tl-dot").classList.toggle("on", auto.on);
+    ["#tl-strategy", "#tl-mode", "#tl-symbol", "#tl-interval"].forEach((id) => (q(id).disabled = auto.on));
+  }
+
+  function renderJournal() {
+    const ol = q("#tl-journal");
+    if (!ol) return;
+    if (!S.journal.length) { ol.innerHTML = '<li class="empty">Ainda vazio. Ligue o piloto automático ou peça um estudo, e o Miquéias anota aqui cada decisão.</li>'; return; }
+    ol.innerHTML = S.journal.slice(0, 40).map((j) => `<li class="${j.kind}"><time>${timeFmt(j.t)}</time><span>${esc(j.text)}</span></li>`).join("");
+  }
+
+  function renderStudy() {
+    const panel = q('[data-panel="study"]');
+    if (!panel) return;
+    const last = S.studies[0];
+    const done = LESSONS.filter((l) => S.lessons[l.id]?.miq).length;
+    panel.innerHTML = `
+      <div class="tl-grid study">
+        <div class="tl-card glass">
+          <div class="tl-auto-head"><b>Sessão de estudo</b>${last ? `<small>Último estudo: ${timeFmt(last.t)}${last.source === "sintetico" ? " · mercado sintético" : " · dados reais da Binance"}</small>` : ""}</div>
+          <p class="tl-desc">O Miquéias baixa os preços de BTC, ETH e SOL em velas de 1 hora e 4 horas, testa as 3 estratégias em cada um e escolhe a melhor para o piloto automático.</p>
+          <button class="btn primary" id="tl-study" ${studying ? "disabled" : ""}>${studying ? "Estudando…" : "Miquéias, estude agora"}</button>
+          <ol class="st-log">${studying ? "" : ""}</ol>
+          ${last ? `
+            <table class="tl-table"><thead><tr><th>Estratégia</th><th>Retorno médio</th><th>Acertos</th><th>Venceu o mercado</th></tr></thead>
+            <tbody>${last.ranking.map((r, i) => `<tr class="${i === 0 ? "best" : ""}"><td>${i === 0 ? "★ " : ""}${esc(r.name)}</td><td class="${r.avg >= 0 ? "up" : "down"}">${pct(r.avg)}</td><td>${Math.round(r.win * 100)}%</td><td>${r.beat}/${r.n}</td></tr>`).join("")}</tbody></table>
+            <ul class="tl-insights">${last.insights.map((t) => `<li>${esc(t)}</li>`).join("")}</ul>` : ""}
+        </div>
+        <div class="tl-card glass">
+          <div class="tl-auto-head"><b>Trilha de estudos</b><small>${done}/${LESSONS.length} estudadas pelo Miquéias</small></div>
+          <div class="tl-progress"><i style="width:${(done / LESSONS.length) * 100}%"></i></div>
+          <ol class="tl-lessons">${LESSONS.map((l, i) => {
+            const st = S.lessons[l.id] || {};
+            return `<li class="${st.miq ? "miq" : ""}">
+              <details>
+                <summary><span class="n">${i + 1}</span><span class="tt">${esc(l.t)}</span>${st.miq ? '<span class="tag">Miquéias estudou</span>' : ""}${st.you ? '<span class="tag you">Você estudou</span>' : ""}</summary>
+                <p>${esc(l.s)}</p>
+                <div class="tl-lesson-actions">
+                  <button class="btn ghost" data-ask="${l.id}">Perguntar ao Miquéias</button>
+                  <label class="tl-check"><input type="checkbox" data-you="${l.id}" ${st.you ? "checked" : ""}> Marquei como estudada</label>
+                </div>
+              </details></li>`;
+          }).join("")}</ol>
+        </div>
+      </div>`;
+  }
+
+  function renderAll() {
+    q("#tl-symbol").value = market.symbol;
+    q("#tl-interval").value = market.interval;
+    q("#tl-speed").value = String(auto.speed);
+    q("#tl-src").textContent = market.source === "binance" ? "Dados reais · Binance" : market.source ? "Mercado sintético (sem conexão)" : "";
+    q("#tl-src").className = `tl-src ${market.source}`;
+    renderAccount();
+    renderAuto();
+    renderJournal();
+    renderTabs();
+  }
+
+  async function load() {
+    stopAuto();
+    q(".tl-loading").hidden = false;
+    const r = await fetchCandles(market.symbol, market.interval);
+    market.candles = r.candles;
+    market.source = r.source;
+    market.ind = indicators(r.candles);
+    cursor = r.candles.length - 1;
+    marks = [];
+    if (S.pos?.symbol === market.symbol) S.pos.last = price();
+    q(".tl-loading").hidden = true;
+    renderAll();
+    drawChart();
+  }
+
+  /* ---------- eventos ---------- */
+  root.addEventListener("click", (e) => {
+    const t = e.target.closest("button, input");
+    if (!t) return;
+    if (t.dataset.tab) { tab = t.dataset.tab; renderTabs(); }
+    if (t.id === "tl-buy") { cursor = auto.on ? cursor : market.candles.length - 1; if (buy("Entrada manual.", "Você")) { renderAccount(); drawChart(); } }
+    if (t.id === "tl-sell") { cursor = auto.on ? cursor : market.candles.length - 1; if (sell("Saída manual.", "Você")) { renderAccount(); drawChart(); } }
+    if (t.id === "tl-go") auto.on ? stopAuto() : startAuto();
+    if (t.id === "tl-reset") {
+      if (t.dataset.armed) resetAccount();
+      else { t.dataset.armed = "1"; t.textContent = "Clique de novo para zerar"; setTimeout(() => { delete t.dataset.armed; t.textContent = "Zerar conta fictícia"; }, 3500); }
+    }
+    if (t.id === "tl-study") study().catch((err) => toast(err.message));
+    if (t.dataset.ask) {
+      const l = LESSONS.find((x) => x.id === t.dataset.ask);
+      askChat(`Me ensine sobre "${l.t}" no trading, com um exemplo prático e os erros mais comuns de iniciante.`);
+    }
+    if (t.dataset.you) {
+      S.lessons[t.dataset.you] = { ...(S.lessons[t.dataset.you] || {}), you: t.checked ? Date.now() : 0 };
+      save();
+      renderStudy();
+    }
+    if (t.id === "tl-research-sites") research("Pesquise os melhores simuladores de trading gratuitos (paper trading e contas demo) disponíveis hoje, incluindo opções para a bolsa brasileira (B3) e para criptomoedas. Para cada um, diga mercados, saldo virtual e se exige cadastro.");
+  });
+  root.addEventListener("change", (e) => {
+    const t = e.target;
+    if (t.id === "tl-symbol") { market.symbol = t.value; load(); }
+    if (t.id === "tl-interval") { market.interval = t.value; load(); }
+    if (t.id === "tl-strategy") { auto.strategy = t.value; renderAuto(); }
+    if (t.id === "tl-mode") auto.mode = t.value;
+    if (t.id === "tl-speed") auto.speed = +t.value;
+  });
+  new ResizeObserver(() => { if (!root.hidden && tab === "sim") drawChart(); }).observe(root);
+
+  let loaded = false;
+
+  /* =========================================================
+     API pública (usada pelo app e pelo Asafe)
+     ========================================================= */
+  return {
+    async open(which) {
+      if (which) tab = which;
+      if (!loaded) { loaded = true; renderAll(); await load(); }
+      else renderAll();
+    },
+    status() {
+      const last = S.studies[0];
+      return {
+        equity: +equity().toFixed(2), cash: +S.cash.toFixed(2), start: S.start,
+        returnPct: +((equity() / S.start - 1) * 100).toFixed(2),
+        position: S.pos ? { symbol: S.pos.symbol, qty: S.pos.qty, entry: S.pos.entry } : null,
+        trades: S.closed.length,
+        autopilot: { on: auto.on, mode: auto.mode, strategy: auto.strategy, symbol: market.symbol },
+        lessonsStudied: LESSONS.filter((l) => S.lessons[l.id]?.miq).map((l) => l.t),
+        lastStudy: last ? { at: new Date(last.t).toISOString(), source: last.source, ranking: last.ranking.map((r) => ({ strategy: r.name, avgReturnPct: +(r.avg * 100).toFixed(2), beatMarket: `${r.beat}/${r.n}` })), insights: last.insights } : null,
+        journal: S.journal.slice(0, 10).map((j) => j.text),
+      };
+    },
+    async study() { if (!loaded) await this.open("study"); const r = await study({ silent: true }); return { ranking: r.ranking.map((x) => ({ strategy: x.name, avgReturnPct: +(x.avg * 100).toFixed(2) })), insights: r.insights, source: r.source }; },
+    async autopilot({ on = true, strategy, symbol, mode } = {}) {
+      if (!loaded) await this.open("sim");
+      if (strategy && !strat(strategy)) throw Object.assign(new Error(`Estratégia desconhecida: ${strategy}. Use ${STRATEGIES.map((s) => s.id).join(", ")}.`), { code: "bad_request" });
+      if (symbol && !sym(symbol)) throw Object.assign(new Error(`Ativo desconhecido: ${symbol}. Use ${SYMBOLS.map((s) => s.id).join(", ")}.`), { code: "bad_request" });
+      stopAuto();
+      if (!on) return { on: false };
+      if (strategy) auto.strategy = strategy;
+      if (mode) auto.mode = mode === "live" ? "live" : "replay";
+      if (symbol && symbol !== market.symbol) { market.symbol = symbol; q("#tl-symbol").value = symbol; await load(); }
+      startAuto();
+      return { on: true, strategy: auto.strategy, mode: auto.mode, symbol: market.symbol, source: market.source };
+    },
+    stop: stopAuto,
+    sites: SITES,
+    redraw: drawChart,
+  };
+}
+
 // Integração opcional com a API da Anthropic (Claude) direto do navegador.
 // O SDK oficial é carregado sob demanda, só quando o usuário configura uma chave.
 const SDK_URL = "https://cdn.jsdelivr.net/npm/@anthropic-ai/sdk@0.135.0/+esm";
@@ -1428,44 +2332,72 @@ async function getClient(apiKey) {
 // Modelos que aceitam o fallback automático do servidor em caso de recusa.
 const FALLBACK_MODELS = new Set(["claude-opus-5-5", "claude-sonnet-5-5"]);
 
+// Busca na web: a versão com filtragem dinâmica roda no Opus 5.5 e Sonnet 5.5; o Haiku usa a básica.
+const webSearchTool = (model) => ({
+  type: model === "claude-haiku-5-5" ? "web_search_20250305" : "web_search_20260209",
+  name: "web_search",
+  max_uses: 6,
+});
+
 /**
  * Faz streaming de uma resposta do Claude.
  * @param {object} o
  * @param {string} o.apiKey
  * @param {string} o.model
  * @param {string} o.system
- * @param {{role:'user'|'assistant', content:string}[]} o.messages
- * @param {boolean} o.deep  raciocínio profundo → effort "high" + resumo do raciocínio
+ * @param {{role:'user'|'assistant', content:any}[]} o.messages
+ * @param {boolean} o.deep    raciocínio profundo → effort "high" + resumo do raciocínio
+ * @param {boolean} o.search  habilidade de pesquisa → ferramenta de busca na web
  * @param {AbortSignal} o.signal
  * @param {(t:string)=>void} o.onText
  * @param {(t:string)=>void} o.onThinking
+ * @param {(q:string)=>void} o.onSearch    consulta que o modelo está pesquisando
+ * @param {(s:{title:string,url:string}[])=>void} o.onSources  fontes encontradas
  */
-async function streamClaude({ apiKey, model, system, messages, deep, signal, onText, onThinking }) {
+async function streamClaude({ apiKey, model, system, messages, deep, search, signal, onText, onThinking, onSearch, onSources }) {
   const client = await getClient(apiKey);
-  const params = {
-    model,
-    max_tokens: 64000,
-    system,
-    messages,
-    thinking: { type: "adaptive", display: deep ? "summarized" : "omitted" },
-    output_config: { effort: deep ? "high" : "low" },
-  };
-  if (FALLBACK_MODELS.has(model)) {
-    params.betas = ["server-side-fallback-2026-07-01"];
-    params.fallbacks = "default";
-  }
-
-  const stream = client.beta.messages.stream(params, { signal });
-  for await (const event of stream) {
-    if (event.type === "content_block_delta") {
-      if (event.delta.type === "text_delta") onText(event.delta.text);
-      else if (event.delta.type === "thinking_delta" && event.delta.thinking) onThinking?.(event.delta.thinking);
+  const convo = [...messages];
+  let final;
+  // A busca no servidor pode pausar o turno (pause_turn); nesse caso continuamos de onde parou.
+  for (let round = 0; round < 4; round++) {
+    const params = {
+      model,
+      max_tokens: 64000,
+      system,
+      messages: convo,
+      thinking: { type: "adaptive", display: deep ? "summarized" : "omitted" },
+      output_config: { effort: deep || search ? "high" : "low" },
+    };
+    if (search) params.tools = [webSearchTool(model)];
+    if (FALLBACK_MODELS.has(model)) {
+      params.betas = ["server-side-fallback-2026-07-01"];
+      params.fallbacks = "default";
     }
-  }
-  const final = await stream.finalMessage();
-  if (final.stop_reason === "refusal") {
-    const why = final.stop_details?.explanation;
-    throw new Error("O modelo recusou este pedido." + (why ? ` (${why})` : ""));
+
+    const stream = client.beta.messages.stream(params, { signal });
+    const queries = new Map(); // índice do bloco → json parcial da consulta
+    for await (const event of stream) {
+      if (event.type === "content_block_start") {
+        const b = event.content_block;
+        if (b.type === "server_tool_use") queries.set(event.index, "");
+        if (b.type === "web_search_tool_result" && Array.isArray(b.content)) {
+          onSources?.(b.content.filter((r) => r.type === "web_search_result").map((r) => ({ title: r.title, url: r.url })));
+        }
+      } else if (event.type === "content_block_delta") {
+        if (event.delta.type === "text_delta") onText(event.delta.text);
+        else if (event.delta.type === "thinking_delta" && event.delta.thinking) onThinking?.(event.delta.thinking);
+        else if (event.delta.type === "input_json_delta" && queries.has(event.index)) queries.set(event.index, queries.get(event.index) + event.delta.partial_json);
+      } else if (event.type === "content_block_stop" && queries.has(event.index)) {
+        try { onSearch?.(JSON.parse(queries.get(event.index) || "{}").query || ""); } catch { /* consulta incompleta */ }
+      }
+    }
+    final = await stream.finalMessage();
+    if (final.stop_reason === "refusal") {
+      const why = final.stop_details?.explanation;
+      throw new Error("O modelo recusou este pedido." + (why ? ` (${why})` : ""));
+    }
+    if (final.stop_reason !== "pause_turn") break;
+    convo.push({ role: "assistant", content: final.content });
   }
   return final;
 }
@@ -1511,6 +2443,7 @@ const ICON = {
   trash: '<svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>',
   file: '<svg viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6Z"/><path d="M14 3v6h6"/></svg>',
   x: '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+  globe: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>',
   spark: '<svg viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/></svg>',
 };
 
@@ -1531,6 +2464,7 @@ const state = {
   chats: store.get("miq.chats", []),
   currentId: null,
   deep: false,
+  search: false,
   busy: null, // AbortController quando gerando
   pendingFile: null,
 };
@@ -1793,6 +2727,7 @@ function renderHistory() {
 
 function openChat(id) {
   if (state.busy) state.busy.abort();
+  showView("chat");
   state.currentId = id;
   const chat = current();
   const msgs = $("#messages");
@@ -1842,7 +2777,9 @@ function aiShell(animate) {
     <div class="body">
       <div class="name">Miquéias <small></small></div>
       <div class="think-slot"></div>
+      <div class="search-slot"></div>
       <div class="md"></div>
+      <div class="sources"></div>
       <div class="actions"></div>
     </div>`;
   $("#messages").append(el);
@@ -1863,6 +2800,8 @@ function addAiMsg(m, isLast, animate = true) {
   el.classList.toggle("last", isLast);
   el.querySelector(".name small").textContent = m.model ? (MODELS.find((x) => x.id === m.model)?.label.split("· ")[1] || "") : "";
   if (m.thinking) renderThinking(el, m.thinking, false);
+  if (m.searches?.length) renderSearching(el, m.searches, false);
+  if (m.sources?.length) renderSources(el, m.sources);
   el.querySelector(".md").innerHTML = m.error ? "" : renderMarkdown(m.content);
   if (m.error) showError(el, m.error);
   fillActions(el, m);
@@ -1878,6 +2817,32 @@ function renderThinking(el, text, live) {
   const body = slot.querySelector(".think-body");
   if (steps) body.innerHTML = `<ol>${steps.map((s) => `<li></li>`).join("")}</ol>`, $$("li", body).forEach((li, i) => (li.textContent = steps[i]));
   else body.textContent = text;
+}
+
+function renderSearching(el, queries, live) {
+  const slot = el.querySelector(".search-slot");
+  slot.innerHTML = `<div class="search-box ${live ? "live" : ""}">${ICON.globe}<span class="${live ? "shimmer" : ""}">${live ? "Pesquisando na web…" : `Pesquisou na web (${queries.length} ${queries.length === 1 ? "busca" : "buscas"})`}</span></div><ul class="search-q"></ul>`;
+  const ul = slot.querySelector("ul");
+  queries.filter(Boolean).forEach((q) => { const li = document.createElement("li"); li.textContent = q; ul.append(li); });
+}
+
+function renderSources(el, sources) {
+  const box = el.querySelector(".sources");
+  box.innerHTML = '<div class="src-head">Fontes</div><div class="src-list"></div>';
+  const list = box.querySelector(".src-list");
+  sources.filter((s) => /^https?:\/\//.test(s.url)).slice(0, 12).forEach((s, i) => {
+    const a = document.createElement("a");
+    a.href = s.url;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    a.title = s.title || s.url;
+    const n = document.createElement("b");
+    n.textContent = i + 1;
+    const host = document.createElement("span");
+    host.textContent = new URL(s.url).hostname.replace(/^www\./, "");
+    a.append(n, host);
+    list.append(a);
+  });
 }
 
 function showError(el, msg) {
@@ -1898,9 +2863,12 @@ function scrollToEnd(smooth = true) {
 }
 
 /* ---------- envio ---------- */
-async function send(text, { regenerate = false, onText: onTextExt } = {}) {
+async function send(text, { regenerate = false, onText: onTextExt, search } = {}) {
   if (state.busy) return;
   text = text.trim();
+  let useSearch = search ?? state.search;
+  const cmd = text.match(/^\/pesquisa(?:r)?\s+([\s\S]+)/i);
+  if (cmd) { useSearch = true; text = cmd[1].trim(); }
   if (!text && !state.pendingFile && !regenerate) return;
 
   const model = state.settings.model;
@@ -1935,6 +2903,7 @@ async function send(text, { regenerate = false, onText: onTextExt } = {}) {
 
   $$(".msg.ai.last").forEach((e) => e.classList.remove("last"));
   const am = { role: "assistant", content: "", model };
+  if (useSearch) { am.searches = []; am.sources = []; }
   const el = aiShell(true);
   el.classList.add("streaming", "last");
   el.querySelector(".name small").textContent = MODELS.find((x) => x.id === model)?.label.split("· ")[1] || "";
@@ -1981,7 +2950,15 @@ async function send(text, { regenerate = false, onText: onTextExt } = {}) {
       }
       const lastUser = [...chat.messages].reverse().find((m) => m.role === "user");
       const prompt = lastUser.content + (lastUser.file ? ` ${lastUser.file.name}` : "");
-      await streamDemo(demoReply(state.settings.name || state.user?.name, prompt), { signal: ctrl.signal, onText });
+      if (useSearch) {
+        await sleep(500);
+        const r = demoResearch(prompt);
+        am.sources = r.sources;
+        if (r.sources.length) renderSources(el, r.sources);
+        await streamDemo(r.text, { signal: ctrl.signal, onText });
+      } else {
+        await streamDemo(demoReply(state.settings.name || state.user?.name, prompt), { signal: ctrl.signal, onText });
+      }
     } else {
       const { streamClaude } = { streamClaude };
       const history = chat.messages
@@ -1991,9 +2968,15 @@ async function send(text, { regenerate = false, onText: onTextExt } = {}) {
       await streamClaude({
         apiKey: state.settings.apiKey,
         model,
-        system: state.settings.system || DEFAULT_SYSTEM,
+        system: (state.settings.system || DEFAULT_SYSTEM) + (useSearch ? `\n\nHoje é ${new Date().toLocaleDateString("pt-BR")}. Pesquise na web antes de responder, compare as fontes e cite-as no texto. Diga claramente quando algo não pôde ser confirmado.` : ""),
         messages: history,
         deep: state.deep,
+        search: useSearch,
+        onSearch: (q) => { am.searches.push(q); renderSearching(el, am.searches, true); },
+        onSources: (list) => {
+          list.forEach((s) => { if (!am.sources.some((x) => x.url === s.url)) am.sources.push(s); });
+          renderSources(el, am.sources);
+        },
         signal: ctrl.signal,
         onText,
         onThinking: (t) => {
@@ -2004,6 +2987,7 @@ async function send(text, { regenerate = false, onText: onTextExt } = {}) {
         },
       });
       if (thinking) renderThinking(el, thinking, false);
+      if (useSearch && am.searches.length) renderSearching(el, am.searches, false);
     }
   } catch (err) {
     if (err?.name !== "AbortError" && !ctrl.signal.aborted) {
@@ -2120,6 +3104,18 @@ function bind() {
   $("#composer").addEventListener("dragover", (e) => e.preventDefault());
   $("#composer").addEventListener("drop", (e) => { e.preventDefault(); attach(e.dataTransfer.files[0]); });
 
+  $("#search-toggle").addEventListener("click", () => setSearch(!state.search));
+  $("#skills").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-skill]");
+    if (!b) return;
+    if (b.dataset.skill === "research") {
+      if (state.view !== "chat" || current()) openChat(null);
+      setSearch(true);
+      $("#input").focus();
+    }
+    if (b.dataset.skill === "trade") showView("lab");
+    closeSidebarMobile();
+  });
   $("#think-toggle").addEventListener("click", (e) => {
     state.deep = !state.deep;
     e.currentTarget.setAttribute("aria-pressed", state.deep);
@@ -2294,6 +3290,38 @@ function bind() {
   link.remove();
   document.head.append(clone);
 })();
+/* ---------- habilidades: visões, pesquisa e laboratório ---------- */
+let lab = null;
+function showView(v) {
+  state.view = v;
+  $("#app").dataset.view = v;
+  $("#lab").classList.toggle("hidden", v !== "lab");
+  $$("#skills [data-skill]").forEach((b) => b.classList.toggle("active", b.dataset.skill === "trade" && v === "lab"));
+  if (v === "lab") { lab.open(); $$(".h-item.active").forEach((x) => x.classList.remove("active")); }
+}
+
+function setSearch(on) {
+  state.search = on;
+  $("#search-toggle").setAttribute("aria-pressed", on);
+  $("#input").placeholder = on ? "O que o Miquéias deve pesquisar na web?" : "Pergunte qualquer coisa ao Miquéias…";
+  $$("#skills [data-skill=research]").forEach((b) => b.classList.toggle("active", on));
+}
+
+function demoResearch(q) {
+  const sims = /simulad|paper|trad|demo|bolsa|cripto|invest/i.test(q);
+  if (sims) {
+    const list = lab.sites.map((s) => `- **${s.name}** (${s.tag}): ${s.note}`).join("\n");
+    return {
+      sources: lab.sites.map((s) => ({ title: s.name, url: s.url })),
+      text: `Aqui estão os simuladores de trading que eu conheço e que foram conferidos por pesquisa em novembro de 2026:\n\n${list}\n\n> Modo demonstração: esta lista vem da minha base local. Com uma chave da API em **Configurações**, eu pesquiso na internet em tempo real e trago fontes novas.`,
+    };
+  }
+  return {
+    sources: [],
+    text: `Para pesquisar **"${q.slice(0, 120)}"** na internet eu preciso de um modelo real.\n\n1. Abra **Configurações** e cole sua chave da API.\n2. Escolha **Miquéias 2 · Pro** no topo.\n3. Peça de novo com o botão **Pesquisa na web** ligado, ou comece a mensagem com \`/pesquisar\`.\n\nAí eu busco em várias fontes, comparo e cito cada link.`,
+  };
+}
+
 /* ---------- logos vivas: desenho inline + brilho que percorre o traço ---------- */
 const LOGO_PATHS = [
   ["logo-frame", "M43 57 L27 31 L27 93 L4 80 L4 21 L32 5 L50 37 L68 5 L96 21 L96 80 L73 93 L73 31 L57 57"],
@@ -2354,6 +3382,13 @@ addEventListener("pointermove", (e) => {
 /* =========================================================
    Início: abertura → login ou app
    ========================================================= */
+lab = createTradeLab({
+  root: $("#lab"),
+  toast,
+  store,
+  askChat: (t) => { openChat(null); send(t); },
+  research: (t) => { openChat(null); send(t, { search: true }); },
+});
 inlineLogos();
 applyMotion();
 startBackground();
@@ -2410,6 +3445,34 @@ function connectAsafe() {
       "chat.new": {
         desc: "Abre uma conversa nova no Miquéias",
         handler: () => { ensureReady(); openChat(null); return { ok: true }; },
+      },
+      "research.run": {
+        desc: "Pesquisa um assunto na web e devolve a resposta com as fontes. payload: { query }",
+        handler: async ({ query }, ctx) => {
+          query = String(query || "").trim();
+          if (!query) throw asafeError("bad_request", "Pesquisa vazia.");
+          ensureReady();
+          openChat(null);
+          toast(`Pesquisa pedida por ${agentName(ctx.from)} pelo Asafe`);
+          const am = await send(query, { search: true, onText: (t) => ctx.progress({ delta: t }) });
+          if (!am) throw asafeError("rejected", "O Miquéias não conseguiu iniciar a pesquisa (confira o modelo e a chave da API).");
+          if (am.error) throw asafeError("model_error", am.error);
+          const chat = current();
+          if (chat && !chat.title.startsWith("⇄")) { chat.title = `⇄ ${agentName(ctx.from)}: ${chat.title}`; saveChats(); renderHistory(); }
+          return { reply: am.content, sources: am.sources || [], searches: am.searches || [], model: am.model };
+        },
+      },
+      "trade.status": {
+        desc: "Resumo do Laboratório de Trade: conta fictícia, posição, piloto automático, último estudo e diário",
+        handler: () => lab.status(),
+      },
+      "trade.study": {
+        desc: "O Miquéias testa as estratégias em BTC, ETH e SOL e devolve o ranking e os aprendizados",
+        handler: () => { ensureReady(); return lab.study(); },
+      },
+      "trade.autopilot": {
+        desc: "Liga ou desliga o piloto automático com dinheiro fictício. payload: { on, strategy?: cruzamento|rsi|rompimento, symbol?: BTCUSDT|ETHUSDT|SOLUSDT, mode?: replay|live }",
+        handler: (p) => { ensureReady(); showView("lab"); return lab.autopilot(p); },
       },
       "settings.model": {
         desc: `Troca o modelo do Miquéias. payload: { model: ${MODELS.map((m) => `"${m.id}"`).join(" | ")} }`,
