@@ -1,5 +1,5 @@
 // Núcleo do Miquéias: conversa com o Horácio pelo Asafe e registro de tudo o que ele faz aqui.
-export function createNucleo({ root, toast, store, brain, getLink, tellAgent, roster }) {
+export function createNucleo({ root, toast, store, brain, getLink, tellAgent, roster, core }) {
   const KEY = "miq.nucleo";
   let feed = store.get(KEY, []);
   let agents = [];
@@ -22,6 +22,20 @@ export function createNucleo({ root, toast, store, brain, getLink, tellAgent, ro
           <p>Aqui o Miquéias conversa com o <b>Horácio</b> pelo Asafe e registra cada coisa que ele pede ou faz na tela.</p>
         </div>
       </header>
+
+      <div class="nc-core glass">
+        <div class="nc-core-mark"><svg class="logo" aria-hidden="true"><use href="#logo"/></svg></div>
+        <div class="nc-core-info">
+          <small>Núcleo do Miquéias</small>
+          <b id="nc-core-name">JpG 1.1</b>
+          <span id="nc-core-base"></span>
+        </div>
+        <dl class="nc-core-meta">
+          <div><dt>Situação</dt><dd id="nc-core-state">—</dd></div>
+          <div><dt>Esforço</dt><dd id="nc-core-effort">—</dd></div>
+          <div><dt>Memória</dt><dd id="nc-core-mem">—</dd></div>
+        </dl>
+      </div>
 
       <div class="nc-status">
         <div class="nc-stat glass"><small>Asafe</small><b id="nc-asafe">—</b><span id="nc-asafe-mode"></span></div>
@@ -85,7 +99,19 @@ export function createNucleo({ root, toast, store, brain, getLink, tellAgent, ro
     q("#nc-errs").textContent = stats.err ? `${stats.err} recusadas ou com erro` : "nenhum erro";
   }
 
+  function renderCore() {
+    if (!core) return;
+    const c = core();
+    q("#nc-core-name").textContent = c.name;
+    q("#nc-core-base").textContent = `construído sobre o ${c.base}`;
+    q("#nc-core-state").textContent = c.active ? "Ativo" : `Em espera (${c.mode})`;
+    q("#nc-core-state").className = c.active ? "on" : "";
+    q("#nc-core-effort").textContent = c.effort;
+    q("#nc-core-mem").textContent = `${c.memories} ${c.memories === 1 ? "lembrança" : "lembranças"}`;
+  }
+
   async function refresh() {
+    renderCore();
     const link = getLink();
     const st = link?.status || "desconectado";
     const label = { online: "Conectado", waiting: "Aguardando o Asafe", connecting: "Conectando…", offline: "Desligado" }[st] || "Desconectado";

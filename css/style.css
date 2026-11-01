@@ -736,6 +736,26 @@ kbd { margin-left: auto; font-size: 10.5px; color: var(--muted); border: 1px sol
 @media (max-width: 980px) { .nc-grid { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 560px) { .nc-status { grid-template-columns: minmax(0, 1fr); } }
 
+/* núcleo JpG 1.1 */
+.core-chip { display: inline-flex; align-items: center; gap: 8px; margin: -12px 0 18px; padding: 4px 12px; border-radius: 999px; font-size: 12px; color: #cdf6fb;
+  background: linear-gradient(155deg, rgba(0,229,255,.14), rgba(255,255,255,.03)); border: 1px solid rgba(0,229,255,.28); box-shadow: inset 0 1px 0 rgba(255,255,255,.1); animation: blurInUp .9s .45s var(--ease) both; }
+.core-chip::before { content: ""; width: 6px; height: 6px; border-radius: 2px; background: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
+.select-field select { width: 100%; padding: 22px 14px 8px; border-radius: var(--r); background: rgba(0,0,0,.45); border: 1px solid var(--line); outline: none; color: var(--text); font-size: 14px; appearance: none; }
+.select-field select:focus { border-color: var(--cyan); box-shadow: 0 0 0 4px rgba(0,229,255,.12); }
+.select-field label { top: 6px; font-size: 11px; color: var(--cyan); }
+.nc-core { display: flex; align-items: center; gap: 18px; padding: 18px 20px; border-radius: var(--r-xl); flex-wrap: wrap; position: relative; overflow: hidden; }
+.nc-core::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(420px circle at 0% 50%, rgba(0,229,255,.12), transparent 60%); }
+.nc-core-mark { width: 62px; height: 62px; display: grid; place-items: center; flex: none; }
+.nc-core-mark .logo { width: 54px; height: 54px; color: #fff; filter: drop-shadow(0 0 14px rgba(0,229,255,.6)); }
+.nc-core-info { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.nc-core-info small { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted-2); }
+.nc-core-info b { font-size: 26px; font-weight: 700; letter-spacing: -.02em; background: linear-gradient(90deg, #fff, var(--cyan)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.nc-core-info span { font-size: 13px; color: var(--muted); }
+.nc-core-meta { display: flex; gap: 22px; flex-wrap: wrap; position: relative; z-index: 1; }
+.nc-core-meta dt { font-size: 11px; color: var(--muted-2); text-transform: uppercase; letter-spacing: .08em; }
+.nc-core-meta dd { font-size: 14px; font-weight: 500; }
+.nc-core-meta dd.on { color: var(--cyan); }
+
 /* aviso "Horácio está operando" no visual do Miquéias */
 .asafe-ui-banner { font-family: var(--font) !important; background: linear-gradient(155deg, rgba(30,40,46,.82), rgba(6,12,15,.9)) !important; border-color: rgba(0,229,255,.35) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.1), 0 14px 40px -12px var(--cyan-glow) !important; top: max(14px, env(safe-area-inset-top, 0px)) !important; }
 .asafe-ui-banner i { background: var(--cyan) !important; box-shadow: 0 0 10px var(--cyan); }

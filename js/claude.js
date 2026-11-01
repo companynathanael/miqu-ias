@@ -29,7 +29,8 @@ const webSearchTool = (model) => ({
  * @param {string} o.model
  * @param {string} o.system
  * @param {{role:'user'|'assistant', content:any}[]} o.messages
- * @param {boolean} o.deep    raciocínio profundo → effort "high" + resumo do raciocínio
+ * @param {boolean} o.deep    raciocínio profundo → mostra o resumo do raciocínio
+ * @param {string} o.effort   nível de esforço (low | medium | high | xhigh), definido pelo núcleo JpG
  * @param {boolean} o.search  habilidade de pesquisa → ferramenta de busca na web
  * @param {AbortSignal} o.signal
  * @param {(t:string)=>void} o.onText
@@ -39,7 +40,7 @@ const webSearchTool = (model) => ({
  * @param {object[]} o.tools  ferramentas do próprio site (executadas no navegador)
  * @param {(name:string, input:object)=>Promise<any>} o.onToolUse  executa uma ferramenta e devolve o resultado
  */
-export async function streamClaude({ apiKey, model, system, messages, deep, search, signal, onText, onThinking, onSearch, onSources, tools: siteTools = [], onToolUse }) {
+export async function streamClaude({ apiKey, model, system, messages, deep, effort, search, signal, onText, onThinking, onSearch, onSources, tools: siteTools = [], onToolUse }) {
   const client = await getClient(apiKey);
   const convo = [...messages];
   let final;
@@ -52,7 +53,7 @@ export async function streamClaude({ apiKey, model, system, messages, deep, sear
       system,
       messages: convo,
       thinking: { type: "adaptive", display: deep ? "summarized" : "omitted" },
-      output_config: { effort: deep || search ? "high" : "low" },
+      output_config: { effort: effort || (deep || search ? "high" : "medium") },
     };
     const tools = [...(search ? [webSearchTool(model)] : []), ...siteTools];
     if (tools.length) params.tools = tools;

@@ -97,3 +97,13 @@ O módulo `js/asafe-ui.js` (vindo de `companynathanael/Hor-cio-Jarvis`, commit 6
 - **Contexto**: o modelo recebe a tela atual, o estado da conta fictícia e a memória.
 - **Núcleo** (`js/nucleo.js`): painel com o status do Asafe e do Horácio, a conversa entre os dois e o registro de cada pedido ou operação de tela, com erro e sugestão. O Miquéias fala com o Horácio por `chat.say` quando ele tiver essa ação; até lá, por `notify` (sem resposta).
 - Os botões principais têm nomes estáveis (`data-asafe-name`): Nova conversa, Conta, Modelo, Enviar, Pesquisa, Laboratório de Trade, Núcleo. Erros `not_found`/`ambiguous` dos `ui.*` trazem nomes parecidos e a dica de usar `agent.do`.
+
+## Núcleo JpG 1.1
+
+O **JpG 1.1** é o núcleo do Miquéias (`js/core.js`). Ele é uma camada própria construída sobre o **Claude Opus 5.5**, da Anthropic: o Opus 5.5 faz o raciocínio, e o JpG 1.1 define a identidade, os princípios, o estilo, o esforço e as ferramentas. Não é um modelo treinado do zero, e o Miquéias diz isso se perguntarem.
+
+- **Princípios:** útil de verdade, honesto, pensa antes, cuidadoso (trading é estudo com dinheiro fictício), respeita quem decide, age com transparência.
+- **Esforço** (Configurações): Rápido, Equilibrado (padrão), Profundo e Máximo. O botão "Raciocínio profundo" sobe um nível só naquela mensagem; a pesquisa na web usa pelo menos "Profundo".
+- **Modos:** JpG 1.1 (Opus 5.5), Rápido (Sonnet 5.5) e Lite (Haiku 5.5), os dois últimos com os mesmos princípios, além do modo Demo, sem chave.
+- **Instruções extras** (Configurações) entram junto com as do núcleo. O antigo modo "Pro" vira o JpG 1.1 automaticamente.
+- No Asafe, `settings.model` aceita `"jpg-1.1"` (e `"claude-opus-5-5"` como nome antigo), e `ping` devolve `core { name, base, active, effort }`.

@@ -218,6 +218,7 @@
           </div>
           <h2 class="greet"><span id="greet-text">Olá</span><span class="caret"></span></h2>
           <p class="greet-sub">Como posso ajudar hoje?</p>
+          <span class="core-chip">Núcleo JpG 1.1</span>
           <div class="suggestions" id="suggestions"></div>
         </div>
         <div class="messages" id="messages" aria-live="polite"></div>
@@ -278,8 +279,18 @@
         <p class="hint">Sem chave, o Miquéias roda em <b>modo demonstração</b> com respostas locais. Com uma chave, as respostas vêm do Claude em tempo real. A chave fica salva apenas no seu navegador — use somente em máquinas de confiança.</p>
         <div class="field">
           <textarea id="s-system" rows="3" placeholder=" "></textarea>
-          <label for="s-system">Personalidade / instruções do sistema</label>
+          <label for="s-system">Instruções extras para o núcleo JpG 1.1</label>
         </div>
+        <div class="field select-field">
+          <select id="s-effort">
+            <option value="low">Rápido: respostas curtas e imediatas</option>
+            <option value="medium">Equilibrado: o padrão, bom para quase tudo</option>
+            <option value="high">Profundo: pensa mais antes de responder</option>
+            <option value="xhigh">Máximo: para problemas difíceis, mais lento</option>
+          </select>
+          <label for="s-effort">Esforço do núcleo JpG 1.1</label>
+        </div>
+        <p class="hint">O <b>JpG 1.1</b> é o núcleo do Miquéias, construído sobre o Claude Opus 5.5. O botão "Raciocínio profundo" sobe um nível de esforço só naquela mensagem.</p>
         <label class="switch">
           <input type="checkbox" id="s-motion" />
           <span class="track"><span class="thumb"></span></span>

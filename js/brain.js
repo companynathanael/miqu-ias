@@ -46,6 +46,8 @@ export function createBrain(d) {
   const INTENTS = [
     { id: "ajuda", desc: "Lista o que o Miquéias sabe fazer", example: "o que você sabe fazer?",
       re: /^(ajuda|comandos|o que (voce )?(sabe|consegue|pode) fazer|quais (sao )?(suas )?habilidades)/ },
+    { id: "sobre_nucleo", desc: "Explica o núcleo JpG 1.1 e o modelo que roda por baixo", example: "qual é o seu núcleo?",
+      re: /(qual (e |eh )?(o )?(seu|teu) (modelo|nucleo|cerebro)|o que e (o )?jpg|^jpg\b|sobre (o )?(seu )?nucleo|(em )?que modelo (voce )?(roda|usa|e baseado))/ },
     { id: "nova_conversa", desc: "Abre uma conversa nova", example: "abra uma nova conversa",
       re: /^((abr[aei]r?|comec[ae]r?|inici[ae]r?|cri[ae]r?)\s+(uma\s+)?(nova\s+conversa|conversa\s+nova)|nova conversa)/ },
     { id: "abrir_laboratorio", desc: "Abre o Laboratório de Trade (aba opcional: estudos ou simuladores)", example: "abra o laboratório de trade na aba estudos",
@@ -119,10 +121,12 @@ export function createBrain(d) {
     if (!it) throw fail("not_understood", "Não reconheci esse passo.");
     if (remote && it.protected && !confirm) throw fail("needs_confirmation", `${it.protected}: confirma esta ação?`);
     const a = step.args || {};
-    const needLogin = !["ajuda", "memoria", "agentes", "status_trade"].includes(it.id);
+    const needLogin = !["ajuda", "memoria", "agentes", "status_trade", "sobre_nucleo"].includes(it.id);
     if (needLogin && !d.isLoggedIn()) throw fail("not_ready", "O Miquéias está na tela de entrada. Entre no Miquéias e tente de novo.");
 
     switch (it.id) {
+      case "sobre_nucleo":
+        return { detail: "Expliquei o núcleo JpG 1.1.", text: d.about() };
       case "ajuda":
         return { detail: "Listei o que sei fazer.", text: helpText() };
       case "nova_conversa":

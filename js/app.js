@@ -4,6 +4,7 @@ import { playIntro } from "./intro.js";
 import { createTradeLab } from "./trade.js";
 import { createBrain } from "./brain.js";
 import { createNucleo } from "./nucleo.js";
+import { JPG } from "./core.js";
 
 /* =========================================================
    Utilidades
@@ -43,17 +44,26 @@ const ICON = {
 /* =========================================================
    Estado
    ========================================================= */
+// api: modelo do Claude que roda por baixo. O JpG 1.1 é o núcleo do Miquéias, sobre o Opus 5.5.
 const MODELS = [
-  { id: "demo", label: "Miquéias 2 · Demo", desc: "Respostas locais, sem chave de API" },
-  { id: "claude-opus-5-5", label: "Miquéias 2 · Pro", desc: "Máxima inteligência — Claude Opus 5.5" },
-  { id: "claude-sonnet-5-5", label: "Miquéias 2 · Rápido", desc: "Equilíbrio entre velocidade e qualidade — Claude Sonnet 5.5" },
-  { id: "claude-haiku-5-5", label: "Miquéias 2 · Lite", desc: "Respostas instantâneas — Claude Haiku 5.5" },
+  { id: "demo", label: "Miquéias · Demo", short: "Demo", desc: "Respostas locais, sem chave de API" },
+  { id: JPG.id, label: JPG.name, short: JPG.name, desc: `Núcleo do Miquéias · base ${JPG.baseLabel}`, api: JPG.base, core: true },
+  { id: "claude-sonnet-5-5", label: "Miquéias · Rápido", short: "Rápido", desc: "Princípios do JpG sobre o Claude Sonnet 5.5: mais veloz", api: "claude-sonnet-5-5" },
+  { id: "claude-haiku-5-5", label: "Miquéias · Lite", short: "Lite", desc: "Princípios do JpG sobre o Claude Haiku 5.5: instantâneo", api: "claude-haiku-5-5" },
 ];
-const DEFAULT_SYSTEM = "Você é o Miquéias, o Agente 2: um assistente de IA brasileiro, direto, caloroso e preciso. Responda em português do Brasil, use Markdown quando ajudar a leitura e seja conciso.";
+const modelInfo = (id) => MODELS.find((x) => x.id === id) || MODELS[0];
+const apiModel = (id) => modelInfo(id).api || id;
+const OLD_SYSTEM = "Você é o Miquéias, o Agente 2: um assistente de IA brasileiro, direto, caloroso e preciso. Responda em português do Brasil, use Markdown quando ajudar a leitura e seja conciso.";
+// Instruções de sistema completas do núcleo (identidade + princípios + estado + extras do usuário)
+const coreSystem = (extraAddon = "") => JPG.system({
+  extra: [state.settings.system, extraAddon].filter(Boolean).join("\n\n"),
+  context: brain.context(),
+  userName: state.settings.name || state.user?.name || "",
+});
 
 const state = {
   user: store.get("miq.user", null),
-  settings: { name: "", apiKey: "", system: DEFAULT_SYSTEM, model: "demo", reduceMotion: false, ...store.get("miq.settings", {}) },
+  settings: { name: "", apiKey: "", system: "", model: "demo", effort: JPG.defaultEffort, reduceMotion: false, ...store.get("miq.settings", {}) },
   chats: store.get("miq.chats", []),
   currentId: null,
   deep: false,
@@ -61,6 +71,11 @@ const state = {
   busy: null, // AbortController quando gerando
   pendingFile: null,
 };
+// Migração: o antigo "Pro" (Opus 5.5) virou o núcleo JpG 1.1; o texto padrão antigo não é mais necessário
+if (state.settings.model === "claude-opus-5-5") state.settings.model = JPG.id;
+if (state.settings.system === OLD_SYSTEM) state.settings.system = "";
+if (!JPG.efforts.some((e) => e.id === state.settings.effort)) state.settings.effort = JPG.defaultEffort;
+store.set("miq.settings", state.settings);
 const saveChats = () => store.set("miq.chats", state.chats);
 const saveSettings = () => store.set("miq.settings", state.settings);
 const current = () => state.chats.find((c) => c.id === state.currentId) || null;
@@ -241,8 +256,9 @@ function renderUser() {
 }
 
 function renderModel() {
-  const m = MODELS.find((x) => x.id === state.settings.model) || MODELS[0];
+  const m = modelInfo(state.settings.model);
   $("#model-label").textContent = m.label;
+  $$(".core-chip").forEach((c) => (c.textContent = m.core ? `Núcleo ${JPG.name} · ${JPG.efforts.find((e) => e.id === state.settings.effort)?.label || "Equilibrado"}` : m.id === "demo" ? `Núcleo ${JPG.name} · modo demonstração` : `${m.label} · princípios do ${JPG.name}`));
   $(".model-pill .pulse").classList.toggle("demo", m.id === "demo");
   $("#model-menu").innerHTML = MODELS.map((x) => `
     <button role="menuitem" data-model="${x.id}" class="${x.id === m.id ? "sel" : ""}">
@@ -392,7 +408,7 @@ function fillActions(el, m) {
 function addAiMsg(m, isLast, animate = true) {
   const el = aiShell(animate);
   el.classList.toggle("last", isLast);
-  el.querySelector(".name small").textContent = m.model ? (MODELS.find((x) => x.id === m.model)?.label.split("· ")[1] || "") : "";
+  el.querySelector(".name small").textContent = m.model ? (modelInfo(m.model === "claude-opus-5-5" ? JPG.id : m.model).short || "") : "";
   if (m.thinking) renderThinking(el, m.thinking, false);
   if (m.searches?.length) renderSearching(el, m.searches, false);
   if (m.actions?.length) renderActions(el, m.actions);
@@ -524,7 +540,7 @@ async function send(text, { regenerate = false, onText: onTextExt, search } = {}
   if (useSearch) { am.searches = []; am.sources = []; }
   const el = aiShell(true);
   el.classList.add("streaming", "last");
-  el.querySelector(".name small").textContent = MODELS.find((x) => x.id === model)?.label.split("· ")[1] || "";
+  el.querySelector(".name small").textContent = modelInfo(model).short || "";
   const mdEl = el.querySelector(".md");
   mdEl.innerHTML = '<span class="typing"><i></i><i></i><i></i></span>';
   scrollToEnd();
@@ -603,8 +619,9 @@ async function send(text, { regenerate = false, onText: onTextExt, search } = {}
       let thinking = "";
       await streamClaude({
         apiKey: state.settings.apiKey,
-        model,
-        system: (state.settings.system || DEFAULT_SYSTEM) + `\n\n${brain.context()}` + (useSearch ? `\n\nHoje é ${new Date().toLocaleDateString("pt-BR")}. Pesquise na web antes de responder, compare as fontes e cite-as no texto. Diga claramente quando algo não pôde ser confirmado.` : ""),
+        model: apiModel(model),
+        system: coreSystem() + (useSearch ? `\n\nHoje é ${new Date().toLocaleDateString("pt-BR")}. Pesquise na web antes de responder, compare as fontes e cite-as no texto. Diga claramente quando algo não pôde ser confirmado.` : ""),
+        effort: JPG.effort(state.settings.effort, { deep: state.deep, search: useSearch }),
         messages: history,
         deep: state.deep,
         search: useSearch,
@@ -721,7 +738,8 @@ function toggleSidebar(open) {
 function openSettings() {
   $("#s-name").value = state.settings.name || "";
   $("#s-key").value = state.settings.apiKey || "";
-  $("#s-system").value = state.settings.system || DEFAULT_SYSTEM;
+  $("#s-system").value = state.settings.system || "";
+  $("#s-effort").value = state.settings.effort || JPG.defaultEffort;
   $("#s-motion").checked = !!state.settings.reduceMotion;
   $("#settings").classList.add("open");
   $("#settings").setAttribute("aria-hidden", "false");
@@ -909,9 +927,10 @@ function bind() {
   $("#s-save").addEventListener("click", () => {
     state.settings.name = $("#s-name").value.trim();
     state.settings.apiKey = $("#s-key").value.trim();
-    state.settings.system = $("#s-system").value.trim() || DEFAULT_SYSTEM;
+    state.settings.system = $("#s-system").value.trim();
+    state.settings.effort = $("#s-effort").value;
     state.settings.reduceMotion = $("#s-motion").checked;
-    if (state.settings.apiKey && state.settings.model === "demo") state.settings.model = "claude-opus-5-5";
+    if (state.settings.apiKey && state.settings.model === "demo") state.settings.model = JPG.id;
     if (!state.settings.apiKey && state.settings.model !== "demo") state.settings.model = "demo";
     saveSettings();
     applyMotion();
@@ -1084,8 +1103,13 @@ const brain = createBrain({
     return r;
   },
   roster: rosterSafe,
+  about: () => JPG.about(),
 });
 const nucleo = createNucleo({
+  core: () => {
+    const m = modelInfo(state.settings.model);
+    return { name: JPG.name, base: JPG.baseLabel, active: !!m.core, mode: m.label, effort: JPG.efforts.find((e) => e.id === state.settings.effort)?.label || "Equilibrado", memories: brain.memory.list().length };
+  },
   root: $("#nucleo"),
   toast,
   store,
@@ -1138,8 +1162,9 @@ async function nucleoReply(text, from) {
       let out = "";
       await streamClaude({
         apiKey: state.settings.apiKey,
-        model: state.settings.model,
-        system: `${DEFAULT_SYSTEM}\n\n${brain.context()}\n\nVocê está respondendo ao agente ${who} pelo Asafe, não ao usuário. Responda em até 3 frases, direto ao ponto. Se ele quiser que você faça algo no seu site, explique que pode pedir com agent.do { goal } e dê o goal exato.`,
+        model: apiModel(state.settings.model),
+        system: coreSystem(`Você está respondendo ao agente ${who} pelo Asafe, não ao usuário. Responda em até 3 frases, direto ao ponto. Se ele quiser que você faça algo no seu site, explique que pode pedir com agent.do { goal } e dê o goal exato.`),
+        effort: "low",
         messages: [{ role: "user", content: text }],
         deep: false,
         onText: (t) => { out += t; },
@@ -1157,7 +1182,7 @@ function connectAsafe() {
   const actions = {
       ping: {
         desc: "Mostra se o Miquéias está pronto e qual modelo está usando",
-        handler: () => ({ ready: !$("#app").classList.contains("hidden"), busy: !!state.busy, model: state.settings.model }),
+        handler: () => ({ ready: !$("#app").classList.contains("hidden"), busy: !!state.busy, model: state.settings.model, core: { name: JPG.name, base: JPG.base, active: modelInfo(state.settings.model).core === true, effort: state.settings.effort } }),
       },
       "chat.ask": {
         desc: "Envia um pedido ao Miquéias, que responde na própria interface e devolve o texto. payload: { prompt, newChat? }",
@@ -1250,6 +1275,7 @@ function connectAsafe() {
       "settings.model": {
         desc: `Troca o modelo do Miquéias. payload: { model: ${MODELS.map((m) => `"${m.id}"`).join(" | ")} }`,
         handler: ({ model }) => {
+          if (model === "claude-opus-5-5") model = JPG.id; // nome antigo do modo Pro
           const m = MODELS.find((x) => x.id === model);
           if (!m) throw asafeError("bad_request", `Modelo desconhecido: ${model}`);
           if (m.id !== "demo" && !state.settings.apiKey) throw asafeError("no_api_key", "Esse modelo precisa de uma chave da API configurada no Miquéias.");
@@ -1276,7 +1302,7 @@ function connectAsafe() {
       }
     };
   }
-  const link = window.AsafeLink.connect({ id: "miqueias", name: "Miquéias", role: "IA auxiliar · Agente 2", kind: "ia", actions });
+  const link = window.AsafeLink.connect({ id: "miqueias", name: "Miquéias", role: `IA auxiliar · núcleo ${JPG.name}`, kind: "ia", actions });
   // Pedido do Miquéias retido no Asafe à espera da permissão do Sr. Nathanael (SDK 2)
   link.on("permission", ({ state: st, action }) => {
     if (st === "pending") { nucleo.log({ kind: "sys", text: `Pedido "${action}" aguardando sua permissão no Asafe (aba Permissões).` }); toast("Aprove o pedido do Miquéias na aba Permissões do Asafe"); }
