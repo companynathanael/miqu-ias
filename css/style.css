@@ -299,28 +299,32 @@ kbd { margin-left: auto; font-size: 10.5px; color: var(--muted); border: 1px sol
 /* boas-vindas */
 .welcome { max-width: 760px; margin: 0 auto; min-height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 8px; padding: 30px 0; }
 .welcome.gone { display: none; }
-.welcome-logo { width: 84px; height: 84px; border-radius: 26px; display: grid; place-items: center; margin-bottom: 16px; position: relative;
-  background: radial-gradient(circle at 30% 20%, rgba(0,229,255,.18), rgba(0,0,0,.6)); border: 1px solid var(--line-2);
-  box-shadow: 0 0 60px -10px var(--cyan-glow), inset 0 1px 0 rgba(255,255,255,.06); animation: float 6s ease-in-out infinite; }
-.welcome-logo .logo { width: 46px; height: 46px; }
+.welcome-logo { position: relative; display: grid; place-items: center; width: 132px; height: 132px; margin-bottom: 8px; animation: float 6s ease-in-out infinite; }
+.welcome-logo::before { content: ""; position: absolute; inset: -30%; border-radius: 50%; background: radial-gradient(circle, rgba(0,229,255,.28), transparent 62%); filter: blur(18px); animation: halo 5s ease-in-out infinite; }
+.welcome-logo .logo { position: relative; width: 112px; height: 112px; color: #fff; filter: drop-shadow(0 0 22px rgba(0,229,255,.55)) drop-shadow(0 0 2px rgba(255,255,255,.6)); }
+@keyframes halo { 50% { opacity: .55; transform: scale(.9); } }
 @keyframes float { 50% { transform: translateY(-8px); } }
 .greet { font-size: clamp(26px, 5vw, 36px); font-weight: 600; letter-spacing: -.02em; display: flex; align-items: center; }
 .greet #greet-text { background: linear-gradient(90deg, var(--text), var(--cyan) 70%); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .caret { width: 3px; height: 1em; margin-left: 4px; background: var(--cyan); border-radius: 2px; animation: blink 1s steps(1) infinite; }
 @keyframes blink { 50% { opacity: 0; } }
-.greet-sub { color: var(--muted); margin-bottom: 26px; animation: blurInUp .9s .3s var(--ease) both; }
-.suggestions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; width: 100%; }
+.greet-sub { color: var(--muted); margin-bottom: 22px; animation: blurInUp .9s .3s var(--ease) both; }
+.suggestions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; max-width: 760px; }
 .sugg {
-  text-align: left; padding: 16px; border-radius: var(--r-lg); background: var(--glass); border: 1px solid var(--glass-border); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); box-shadow: var(--glass-shine);
-  display: flex; gap: 12px; align-items: flex-start; transition: transform .35s var(--ease), border-color .3s, background .3s, box-shadow .3s;
-  animation: blurInUp .8s var(--ease) both; position: relative; overflow: hidden;
+  display: inline-flex; align-items: center; gap: 9px; padding: 9px 16px 9px 10px; border-radius: 16px; font-size: 13.5px; color: #cfe3e8;
+  background: linear-gradient(155deg, rgba(255,255,255,.08), rgba(255,255,255,.02)); border: 1px solid var(--glass-border);
+  backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.10), 0 10px 30px -18px rgba(0,0,0,.9);
+  position: relative; overflow: hidden; animation: blurInUp .8s var(--ease) both;
+  transition: transform .35s var(--ease), border-color .3s, color .3s, box-shadow .3s;
 }
-.sugg::before { content: ""; position: absolute; inset: 0; background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), rgba(0,229,255,.12), transparent 60%); opacity: 0; transition: opacity .3s; }
-.sugg:hover::before { opacity: 1; }
-.sugg:hover { transform: translateY(-3px); border-color: var(--line-2); box-shadow: 0 16px 40px -18px var(--cyan-glow); }
-.sugg .ic { width: 36px; height: 36px; border-radius: 12px; display: grid; place-items: center; background: rgba(0,229,255,.1); color: var(--cyan); flex: none; }
-.sugg strong { display: block; font-weight: 500; font-size: 14px; }
-.sugg small { color: var(--muted); font-size: 12.5px; }
+.sugg::before { content: ""; position: absolute; inset: 0; background: radial-gradient(120px circle at var(--mx, 50%) var(--my, 50%), rgba(0,229,255,.18), transparent 70%); opacity: 0; transition: opacity .3s; }
+.sugg::after { content: ""; position: absolute; top: 0; left: 18%; right: 18%; height: 1px; background: linear-gradient(90deg, transparent, rgba(0,229,255,.7), transparent); opacity: 0; transition: opacity .3s; }
+.sugg:hover::before, .sugg:hover::after { opacity: 1; }
+.sugg:hover { transform: translateY(-2px); color: #fff; border-color: rgba(0,229,255,.35); box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 14px 34px -16px var(--cyan-glow); }
+.sugg .ic { position: relative; width: 26px; height: 26px; border-radius: 9px; display: grid; place-items: center; color: var(--cyan); background: rgba(0,229,255,.1); box-shadow: inset 0 0 0 1px rgba(0,229,255,.18); }
+.sugg .ic svg { width: 15px; height: 15px; }
+.sugg span { position: relative; }
 
 /* mensagens */
 .messages { max-width: 780px; margin: 0 auto; display: flex; flex-direction: column; gap: 26px; }
@@ -464,14 +468,24 @@ kbd { margin-left: auto; font-size: 10.5px; color: var(--muted); border: 1px sol
 }
 @media (max-width: 560px) {
   body { font-size: 14.5px; }
-  .suggestions { grid-template-columns: 1fr; }
-  .sugg:nth-child(n+3) { display: none; }
+  .welcome-logo { width: 104px; height: 104px; }
+  .welcome-logo .logo { width: 88px; height: 88px; }
   .card { padding: 20px; }
   .msg { gap: 10px; }
   .msg.ai .ai-avatar { width: 30px; height: 30px; }
   .msg.user .bubble { max-width: 88%; }
   .composer-wrap { padding: 0 12px 10px; }
   .chip-toggle .lbl-long { display: none; }
+}
+
+/* telas baixas (notebooks, janelas pequenas) */
+@media (max-height: 720px) {
+  .welcome { padding: 8px 0; gap: 4px; }
+  .welcome-logo { width: 84px; height: 84px; margin-bottom: 2px; }
+  .welcome-logo .logo { width: 70px; height: 70px; }
+  .greet { font-size: 28px; }
+  .greet-sub { margin-bottom: 14px; }
+  .chat { padding-bottom: 16px; }
 }
 
 /* reduzir movimento */

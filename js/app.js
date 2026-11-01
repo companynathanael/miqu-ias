@@ -267,17 +267,16 @@ function typeGreeting() {
 }
 
 const SUGGESTIONS = [
-  { t: "Explique um conceito", s: "como funciona a computação quântica?", q: "Explique como funciona a computação quântica de forma simples", i: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><ellipse cx="12" cy="12" rx="10" ry="4"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(120 12 12)"/></svg>' },
-  { t: "Escreva código", s: "uma função de debounce em JavaScript", q: "Escreva um código de debounce em JavaScript e explique", i: '<svg viewBox="0 0 24 24"><path d="m8 6-6 6 6 6M16 6l6 6-6 6"/></svg>' },
-  { t: "Monte um plano", s: "de estudos para as próximas 4 semanas", q: "Monte um plano de estudos para as próximas 4 semanas", i: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="4"/><path d="M8 2v4M16 2v4M3 10h18"/></svg>' },
-  { t: "Redija um e-mail", s: "propondo os próximos passos do projeto", q: "Escreva um e-mail curto propondo os próximos passos de um projeto", i: '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="4"/><path d="m3 8 9 6 9-6"/></svg>' },
+  { t: "Explicar um conceito", s: "como funciona a computação quântica?", q: "Explique como funciona a computação quântica de forma simples", i: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><ellipse cx="12" cy="12" rx="10" ry="4"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(120 12 12)"/></svg>' },
+  { t: "Escrever código", s: "uma função de debounce em JavaScript", q: "Escreva um código de debounce em JavaScript e explique", i: '<svg viewBox="0 0 24 24"><path d="m8 6-6 6 6 6M16 6l6 6-6 6"/></svg>' },
+  { t: "Montar um plano", s: "de estudos para as próximas 4 semanas", q: "Monte um plano de estudos para as próximas 4 semanas", i: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="4"/><path d="M8 2v4M16 2v4M3 10h18"/></svg>' },
+  { t: "Redigir um e-mail", s: "propondo os próximos passos do projeto", q: "Escreva um e-mail curto propondo os próximos passos de um projeto", i: '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="4"/><path d="m3 8 9 6 9-6"/></svg>' },
 ];
 
 function renderSuggestions() {
   $("#suggestions").innerHTML = SUGGESTIONS.map((x, i) => `
     <button class="sugg" data-q="${x.q}" style="animation-delay:${0.35 + i * 0.08}s">
-      <span class="ic">${x.i}</span>
-      <span><strong>${x.t}</strong><small>${x.s}</small></span>
+      <span class="ic">${x.i}</span><span>${x.t}</span>
     </button>`).join("");
 }
 
@@ -806,6 +805,14 @@ function bind() {
 /* =========================================================
    Início
    ========================================================= */
+// Reinsere o ícone da aba depois do carregamento (ajuda navegadores que o ignoram ao abrir o arquivo local)
+(function refreshFavicon() {
+  const link = document.querySelector('link[rel="icon"]');
+  if (!link) return;
+  const clone = link.cloneNode();
+  link.remove();
+  document.head.append(clone);
+})();
 applyMotion();
 startBackground();
 initLogin();
