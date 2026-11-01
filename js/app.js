@@ -1264,6 +1264,11 @@ function connectAsafe() {
     };
   }
   const link = window.AsafeLink.connect({ id: "miqueias", name: "Miquéias", role: "IA auxiliar · Agente 2", kind: "ia", actions });
+  // Pedido do Miquéias retido no Asafe à espera da permissão do Sr. Nathanael (SDK 2)
+  link.on("permission", ({ state: st, action }) => {
+    if (st === "pending") { nucleo.log({ kind: "sys", text: `Pedido "${action}" aguardando sua permissão no Asafe (aba Permissões).` }); toast("Aprove o pedido do Miquéias na aba Permissões do Asafe"); }
+    if (st === "granted") nucleo.log({ kind: "sys", text: `Permissão concedida no Asafe para "${action}".` });
+  });
   link.on("event", (env) => nucleo.log({ kind: "sys", text: `${agentName(env.from)} avisou: ${env.action}${env.payload?.text ? ` · ${env.payload.text}` : ""}` }));
   let announced = false;
   link.on("status", ({ status }) => {
