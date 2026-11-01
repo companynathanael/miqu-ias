@@ -1,0 +1,817 @@
+import { renderMarkdown } from "./markdown.js";
+import { demoReply, streamDemo, THINK_STEPS } from "./demo.js";
+
+/* =========================================================
+   Utilidades
+   ========================================================= */
+const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* armazenamento indisponível */ } },
+  del(k) { try { localStorage.removeItem(k); } catch { /* ignore */ } },
+};
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+function toast(text, ms = 2600) {
+  const t = document.createElement("div");
+  t.className = "toast";
+  t.textContent = text;
+  $("#toasts").append(t);
+  setTimeout(() => { t.classList.add("out"); setTimeout(() => t.remove(), 400); }, ms);
+}
+
+const ICON = {
+  copy: '<svg viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="3"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>',
+  check: '<svg viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg>',
+  redo: '<svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>',
+  up: '<svg viewBox="0 0 24 24"><path d="M7 10v11H4V10h3Zm0 0 5-7a2 2 0 0 1 3 2l-1 5h5a2 2 0 0 1 2 2.3l-1.2 7A2 2 0 0 1 17.8 21H7"/></svg>',
+  down: '<svg viewBox="0 0 24 24"><path d="M17 14V3h3v11h-3Zm0 0-5 7a2 2 0 0 1-3-2l1-5H5a2 2 0 0 1-2-2.3l1.2-7A2 2 0 0 1 6.2 3H17"/></svg>',
+  speak: '<svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>',
+  trash: '<svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>',
+  file: '<svg viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6Z"/><path d="M14 3v6h6"/></svg>',
+  x: '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+  spark: '<svg viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/></svg>',
+};
+
+/* =========================================================
+   Estado
+   ========================================================= */
+const MODELS = [
+  { id: "demo", label: "Miquéias 2 · Demo", desc: "Respostas locais, sem chave de API" },
+  { id: "claude-opus-5-5", label: "Miquéias 2 · Pro", desc: "Máxima inteligência — Claude Opus 5.5" },
+  { id: "claude-sonnet-5-5", label: "Miquéias 2 · Rápido", desc: "Equilíbrio entre velocidade e qualidade — Claude Sonnet 5.5" },
+  { id: "claude-haiku-5-5", label: "Miquéias 2 · Lite", desc: "Respostas instantâneas — Claude Haiku 5.5" },
+];
+const DEFAULT_SYSTEM = "Você é o Miquéias, o Agente 2: um assistente de IA brasileiro, direto, caloroso e preciso. Responda em português do Brasil, use Markdown quando ajudar a leitura e seja conciso.";
+
+const state = {
+  user: store.get("miq.user", null),
+  settings: { name: "", apiKey: "", system: DEFAULT_SYSTEM, model: "demo", reduceMotion: false, ...store.get("miq.settings", {}) },
+  chats: store.get("miq.chats", []),
+  currentId: null,
+  deep: false,
+  busy: null, // AbortController quando gerando
+  pendingFile: null,
+};
+const saveChats = () => store.set("miq.chats", state.chats);
+const saveSettings = () => store.set("miq.settings", state.settings);
+const current = () => state.chats.find((c) => c.id === state.currentId) || null;
+
+/* =========================================================
+   Fundo animado: grade + partículas com rastro (motion blur)
+   ========================================================= */
+function startBackground() {
+  const cv = $("#bg");
+  const ctx = cv.getContext("2d");
+  let w, h, dpr, parts = [], mouse = { x: -999, y: -999 };
+  const resize = () => {
+    dpr = Math.min(devicePixelRatio || 1, 2);
+    w = cv.width = innerWidth * dpr;
+    h = cv.height = innerHeight * dpr;
+    const n = Math.round(Math.min(90, (innerWidth * innerHeight) / 16000));
+    parts = Array.from({ length: n }, () => spawn(true));
+  };
+  const spawn = (anywhere) => ({
+    x: anywhere ? Math.random() * w : -20,
+    y: Math.random() * h,
+    v: (0.4 + Math.random() * 1.6) * dpr,
+    len: (20 + Math.random() * 90) * dpr,
+    a: 0.15 + Math.random() * 0.5,
+  });
+  addEventListener("resize", resize);
+  addEventListener("pointermove", (e) => {
+    mouse.x = e.clientX * dpr; mouse.y = e.clientY * dpr;
+    const g = $(".cursor-glow");
+    g.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+  });
+  resize();
+
+  let t = 0;
+  const frame = () => {
+    if (document.hidden || state.settings.reduceMotion) { requestAnimationFrame(frame); return; }
+    t += 1;
+    ctx.clearRect(0, 0, w, h);
+    // grade de pontos em perspectiva sutil
+    const gap = 38 * dpr;
+    ctx.fillStyle = "rgba(0,229,255,0.07)";
+    const off = (t * 0.15 * dpr) % gap;
+    for (let x = -gap + off; x < w; x += gap) {
+      for (let y = 0; y < h; y += gap) {
+        const dx = x - mouse.x, dy = y - mouse.y;
+        const near = Math.max(0, 1 - Math.hypot(dx, dy) / (220 * dpr));
+        const r = (1 + near * 2) * dpr * 0.6;
+        ctx.globalAlpha = 0.6 + near * 3;
+        ctx.fillRect(x, y, r, r);
+      }
+    }
+    ctx.globalAlpha = 1;
+    // traços horizontais com gradiente = efeito motion blur
+    for (const p of parts) {
+      p.x += p.v;
+      if (p.x - p.len > w) Object.assign(p, spawn(false));
+      const g = ctx.createLinearGradient(p.x - p.len, 0, p.x, 0);
+      g.addColorStop(0, "rgba(0,229,255,0)");
+      g.addColorStop(1, `rgba(0,229,255,${p.a})`);
+      ctx.strokeStyle = g;
+      ctx.lineWidth = 1.2 * dpr;
+      ctx.beginPath();
+      ctx.moveTo(p.x - p.len, p.y);
+      ctx.lineTo(p.x, p.y);
+      ctx.stroke();
+      ctx.fillStyle = `rgba(160,250,255,${p.a})`;
+      ctx.fillRect(p.x - dpr, p.y - dpr, 2 * dpr, 2 * dpr);
+    }
+    requestAnimationFrame(frame);
+  };
+  requestAnimationFrame(frame);
+}
+
+/* Motion blur direcional real (SVG) aplicado em uma transição */
+async function motionBlurPulse(el, axis = "x", ms = 520) {
+  if (state.settings.reduceMotion) return;
+  const f = $(`#mblur-${axis} feGaussianBlur`);
+  el.style.filter = `url(#mblur-${axis})`;
+  const t0 = performance.now();
+  await new Promise((done) => {
+    const step = (now) => {
+      const k = Math.min(1, (now - t0) / ms);
+      const s = (1 - k) ** 2 * 26;
+      f.setAttribute("stdDeviation", axis === "x" ? `${s} 0` : `0 ${s}`);
+      if (k < 1) requestAnimationFrame(step); else done();
+    };
+    requestAnimationFrame(step);
+  });
+  el.style.filter = "";
+}
+
+/* =========================================================
+   Login
+   ========================================================= */
+function splitTitle() {
+  const el = $(".split");
+  const txt = el.dataset.text;
+  el.innerHTML = [...txt].map((c, i) => `<span class="ch${i >= 4 ? " cy" : ""}" style="animation-delay:${0.15 + i * 0.06}s">${c}</span>`).join("");
+}
+
+function initLogin() {
+  splitTitle();
+  const form = $("#login-form");
+  const tabs = $(".tabs");
+  const setMode = (mode) => {
+    form.dataset.mode = mode;
+    tabs.dataset.mode = mode;
+    $$(".tab", tabs).forEach((t) => { t.classList.toggle("active", t.dataset.mode === mode); t.setAttribute("aria-selected", t.dataset.mode === mode); });
+    $(".btn-label", form).textContent = mode === "signup" ? "Criar conta" : "Entrar";
+    $("#f-pass").autocomplete = mode === "signup" ? "new-password" : "current-password";
+    $(".form-error").textContent = "";
+  };
+  setMode("login");
+  $$(".tab", tabs).forEach((t) => t.addEventListener("click", () => setMode(t.dataset.mode)));
+
+  $("[data-toggle-pass]").addEventListener("click", () => {
+    const p = $("#f-pass");
+    p.type = p.type === "password" ? "text" : "password";
+  });
+
+  const fail = (msg) => {
+    $(".form-error").textContent = msg;
+    form.classList.remove("shake"); void form.offsetWidth; form.classList.add("shake");
+  };
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const mode = form.dataset.mode;
+    const email = $("#f-email").value.trim();
+    const pass = $("#f-pass").value;
+    const name = $("#f-name").value.trim();
+    if (mode === "signup" && name.length < 2) return fail("Informe seu nome.");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return fail("Digite um e-mail válido.");
+    if (pass.length < 6) return fail("A senha precisa ter pelo menos 6 caracteres.");
+    const btn = $("#login-submit");
+    btn.classList.add("loading");
+    btn.disabled = true;
+    await sleep(900);
+    const fallbackName = email.split("@")[0].replace(/[._-]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+    enter({ name: name || state.settings.name || fallbackName, email });
+  });
+
+  $("[data-guest]").addEventListener("click", () => enter({ name: "Convidado", email: "", guest: true }));
+}
+
+async function enter(user) {
+  state.user = user;
+  store.set("miq.user", user);
+  if (!state.settings.name) { state.settings.name = user.name; saveSettings(); }
+  const login = $("#login");
+  login.classList.add("leaving");
+  motionBlurPulse(login, "y", 600);
+  await sleep(650);
+  login.classList.add("hidden");
+  login.classList.remove("leaving");
+  showApp();
+}
+
+/* =========================================================
+   App
+   ========================================================= */
+function showApp() {
+  const app = $("#app");
+  app.classList.remove("hidden");
+  app.classList.add("entering");
+  setTimeout(() => app.classList.remove("entering"), 900);
+  renderUser();
+  renderModel();
+  renderHistory();
+  openChat(null);
+  setTimeout(() => $("#input").focus(), 300);
+}
+
+function renderUser() {
+  const name = state.settings.name || state.user?.name || "Convidado";
+  $("#user-name").textContent = name;
+  $("#avatar").textContent = name.trim()[0]?.toUpperCase() || "M";
+  $("#user-plan").textContent = state.settings.apiKey ? "Conectado à API" : "Modo demonstração";
+}
+
+function renderModel() {
+  const m = MODELS.find((x) => x.id === state.settings.model) || MODELS[0];
+  $("#model-label").textContent = m.label;
+  $(".model-pill .pulse").classList.toggle("demo", m.id === "demo");
+  $("#model-menu").innerHTML = MODELS.map((x) => `
+    <button role="menuitem" data-model="${x.id}" class="${x.id === m.id ? "sel" : ""}">
+      <b>${x.label}</b><small>${x.desc}</small>
+    </button>`).join("");
+}
+
+function greeting() {
+  const h = new Date().getHours();
+  const part = h < 5 ? "Boa noite" : h < 12 ? "Bom dia" : h < 18 ? "Boa tarde" : "Boa noite";
+  const first = (state.settings.name || state.user?.name || "").split(" ")[0];
+  return first && first !== "Convidado" ? `${part}, ${first}` : part;
+}
+
+let typeTimer;
+function typeGreeting() {
+  clearTimeout(typeTimer);
+  const el = $("#greet-text");
+  const text = greeting();
+  let i = 0;
+  el.textContent = "";
+  const step = () => {
+    el.textContent = text.slice(0, ++i);
+    if (i < text.length) typeTimer = setTimeout(step, 38 + Math.random() * 40);
+  };
+  step();
+}
+
+const SUGGESTIONS = [
+  { t: "Explique um conceito", s: "como funciona a computação quântica?", q: "Explique como funciona a computação quântica de forma simples", i: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><ellipse cx="12" cy="12" rx="10" ry="4"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(120 12 12)"/></svg>' },
+  { t: "Escreva código", s: "uma função de debounce em JavaScript", q: "Escreva um código de debounce em JavaScript e explique", i: '<svg viewBox="0 0 24 24"><path d="m8 6-6 6 6 6M16 6l6 6-6 6"/></svg>' },
+  { t: "Monte um plano", s: "de estudos para as próximas 4 semanas", q: "Monte um plano de estudos para as próximas 4 semanas", i: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="4"/><path d="M8 2v4M16 2v4M3 10h18"/></svg>' },
+  { t: "Redija um e-mail", s: "propondo os próximos passos do projeto", q: "Escreva um e-mail curto propondo os próximos passos de um projeto", i: '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="4"/><path d="m3 8 9 6 9-6"/></svg>' },
+];
+
+function renderSuggestions() {
+  $("#suggestions").innerHTML = SUGGESTIONS.map((x, i) => `
+    <button class="sugg" data-q="${x.q}" style="animation-delay:${0.35 + i * 0.08}s">
+      <span class="ic">${x.i}</span>
+      <span><strong>${x.t}</strong><small>${x.s}</small></span>
+    </button>`).join("");
+}
+
+/* ---------- histórico ---------- */
+function groupLabel(ts) {
+  const d = new Date(ts), now = new Date();
+  const days = Math.floor((new Date(now.toDateString()) - new Date(d.toDateString())) / 864e5);
+  if (days === 0) return "Hoje";
+  if (days === 1) return "Ontem";
+  if (days < 7) return "Últimos 7 dias";
+  if (days < 30) return "Últimos 30 dias";
+  return "Mais antigos";
+}
+
+function renderHistory() {
+  const q = $("#search").value.trim().toLowerCase();
+  const list = [...state.chats]
+    .sort((a, b) => b.updated - a.updated)
+    .filter((c) => !q || c.title.toLowerCase().includes(q) || c.messages.some((m) => m.content.toLowerCase().includes(q)));
+  const nav = $("#history");
+  if (!list.length) {
+    nav.innerHTML = `<p class="h-empty">${q ? "Nada encontrado." : "Suas conversas aparecem aqui."}</p>`;
+    return;
+  }
+  let html = "", last = "";
+  list.forEach((c, i) => {
+    const g = groupLabel(c.updated);
+    if (g !== last) { html += `<div class="h-group">${g}</div>`; last = g; }
+    html += `<button class="h-item ${c.id === state.currentId ? "active" : ""}" data-id="${c.id}" style="animation-delay:${Math.min(i, 12) * 0.03}s">
+      <span></span><i class="del" role="button" aria-label="Apagar conversa" data-del="${c.id}">${ICON.trash}</i></button>`;
+  });
+  nav.innerHTML = html;
+  // títulos via textContent (seguro)
+  $$(".h-item", nav).forEach((b) => { b.firstElementChild.textContent = state.chats.find((c) => c.id === b.dataset.id).title; });
+}
+
+function openChat(id) {
+  if (state.busy) state.busy.abort();
+  state.currentId = id;
+  const chat = current();
+  const msgs = $("#messages");
+  msgs.innerHTML = "";
+  if (!chat) {
+    $("#welcome").classList.remove("gone");
+    renderSuggestions();
+    typeGreeting();
+  } else {
+    $("#welcome").classList.add("gone");
+    chat.messages.forEach((m, i) => {
+      if (m.role === "user") addUserMsg(m, false);
+      else addAiMsg(m, i === chat.messages.length - 1, false);
+    });
+    scrollToEnd(false);
+  }
+  renderHistory();
+  closeSidebarMobile();
+}
+
+/* ---------- mensagens ---------- */
+function addUserMsg(m, animate = true) {
+  const el = document.createElement("div");
+  el.className = "msg user";
+  if (!animate) el.style.animation = "none";
+  const b = document.createElement("div");
+  b.className = "bubble";
+  if (m.file) {
+    const tag = document.createElement("div");
+    tag.className = "file-tag";
+    tag.innerHTML = ICON.file;
+    tag.append(m.file.name);
+    b.append(tag, document.createElement("br"));
+  }
+  b.append(m.content);
+  el.append(b);
+  $("#messages").append(el);
+  return el;
+}
+
+function aiShell(animate) {
+  const el = document.createElement("div");
+  el.className = "msg ai";
+  if (!animate) el.style.animation = "none";
+  el.innerHTML = `
+    <div class="ai-avatar"><svg class="logo" aria-hidden="true"><use href="#logo"/></svg></div>
+    <div class="body">
+      <div class="name">Miquéias <small></small></div>
+      <div class="think-slot"></div>
+      <div class="md"></div>
+      <div class="actions"></div>
+    </div>`;
+  $("#messages").append(el);
+  return el;
+}
+
+function fillActions(el, m) {
+  el.querySelector(".actions").innerHTML = `
+    <button data-act="copy" title="Copiar">${ICON.copy}</button>
+    <button data-act="speak" title="Ouvir">${ICON.speak}</button>
+    <button data-act="up" title="Boa resposta" class="${m.rating === 1 ? "on" : ""}">${ICON.up}</button>
+    <button data-act="down" title="Resposta ruim" class="${m.rating === -1 ? "on" : ""}">${ICON.down}</button>
+    <button data-act="redo" title="Gerar novamente">${ICON.redo}</button>`;
+}
+
+function addAiMsg(m, isLast, animate = true) {
+  const el = aiShell(animate);
+  el.classList.toggle("last", isLast);
+  el.querySelector(".name small").textContent = m.model ? (MODELS.find((x) => x.id === m.model)?.label.split("· ")[1] || "") : "";
+  if (m.thinking) renderThinking(el, m.thinking, false);
+  el.querySelector(".md").innerHTML = m.error ? "" : renderMarkdown(m.content);
+  if (m.error) showError(el, m.error);
+  fillActions(el, m);
+  return el;
+}
+
+function renderThinking(el, text, live) {
+  const slot = el.querySelector(".think-slot");
+  const steps = Array.isArray(text) ? text : null;
+  slot.innerHTML = `<details class="thinking-box" ${live ? "open" : ""}>
+    <summary>${ICON.spark}<span class="${live ? "shimmer" : ""}">${live ? "Raciocinando…" : "Raciocínio"}</span></summary>
+    <div class="think-body"></div></details>`;
+  const body = slot.querySelector(".think-body");
+  if (steps) body.innerHTML = `<ol>${steps.map((s) => `<li></li>`).join("")}</ol>`, $$("li", body).forEach((li, i) => (li.textContent = steps[i]));
+  else body.textContent = text;
+}
+
+function showError(el, msg) {
+  const box = document.createElement("div");
+  box.className = "err-box";
+  box.textContent = msg;
+  el.querySelector(".md").replaceChildren(box);
+}
+
+/* ---------- rolagem ---------- */
+const chatEl = () => $("#chat");
+const nearBottom = () => { const c = chatEl(); return c.scrollHeight - c.scrollTop - c.clientHeight < 120; };
+function scrollToEnd(smooth = true) {
+  const c = chatEl();
+  c.style.scrollBehavior = smooth ? "smooth" : "auto";
+  c.scrollTop = c.scrollHeight;
+  c.style.scrollBehavior = "";
+}
+
+/* ---------- envio ---------- */
+async function send(text, { regenerate = false } = {}) {
+  if (state.busy) return;
+  text = text.trim();
+  if (!text && !state.pendingFile && !regenerate) return;
+
+  const model = state.settings.model;
+  if (model !== "demo" && !state.settings.apiKey) {
+    toast("Adicione sua chave da API para usar este modelo.");
+    openSettings();
+    return;
+  }
+
+  let chat = current();
+  if (!chat) {
+    chat = { id: uid(), title: text.slice(0, 48) || state.pendingFile?.name || "Nova conversa", created: Date.now(), updated: Date.now(), messages: [] };
+    state.chats.push(chat);
+    state.currentId = chat.id;
+    $("#welcome").classList.add("gone");
+    motionBlurPulse($("#messages"), "y", 400);
+  }
+
+  if (!regenerate) {
+    const um = { role: "user", content: text };
+    if (state.pendingFile) um.file = state.pendingFile;
+    chat.messages.push(um);
+    addUserMsg(um);
+    clearAttachment();
+    $("#input").value = "";
+    autosize();
+  }
+  chat.updated = Date.now();
+  saveChats();
+  renderHistory();
+
+  $$(".msg.ai.last").forEach((e) => e.classList.remove("last"));
+  const am = { role: "assistant", content: "", model };
+  const el = aiShell(true);
+  el.classList.add("streaming", "last");
+  el.querySelector(".name small").textContent = MODELS.find((x) => x.id === model)?.label.split("· ")[1] || "";
+  const mdEl = el.querySelector(".md");
+  mdEl.innerHTML = '<span class="typing"><i></i><i></i><i></i></span>';
+  scrollToEnd();
+
+  const ctrl = new AbortController();
+  setBusy(ctrl);
+  let follow = true;
+  const onScroll = () => { follow = nearBottom(); };
+  chatEl().addEventListener("scroll", onScroll);
+
+  let raf = 0;
+  const paint = () => {
+    raf = 0;
+    mdEl.innerHTML = renderMarkdown(am.content) || "";
+    const last = mdEl.lastElementChild;
+    const cur = '<span class="cursor"></span>';
+    if (last && /^(P|LI|H\d)$/.test(last.tagName)) last.insertAdjacentHTML("beforeend", cur);
+    else if (last?.tagName === "UL" || last?.tagName === "OL") last.lastElementChild?.insertAdjacentHTML("beforeend", cur);
+    else mdEl.insertAdjacentHTML("beforeend", cur);
+    if (follow) scrollToEnd(false);
+  };
+  const onText = (t) => { am.content += t; if (!raf) raf = requestAnimationFrame(paint); };
+
+  try {
+    if (model === "demo") {
+      await sleep(350 + Math.random() * 400);
+      if (state.deep) {
+        am.thinking = [];
+        renderThinking(el, [], true);
+        const ol = el.querySelector(".think-body ol");
+        for (const s of THINK_STEPS) {
+          if (ctrl.signal.aborted) throw Object.assign(new Error(), { name: "AbortError" });
+          const li = document.createElement("li");
+          li.textContent = s;
+          li.style.animation = "blurInLeft .5s both";
+          ol.append(li);
+          am.thinking.push(s);
+          await sleep(420 + Math.random() * 300);
+        }
+        renderThinking(el, am.thinking, false);
+      }
+      const lastUser = [...chat.messages].reverse().find((m) => m.role === "user");
+      const prompt = lastUser.content + (lastUser.file ? ` ${lastUser.file.name}` : "");
+      await streamDemo(demoReply(state.settings.name || state.user?.name, prompt), { signal: ctrl.signal, onText });
+    } else {
+      const { streamClaude } = await import("./claude.js");
+      const history = chat.messages
+        .filter((m) => !m.error && m.content)
+        .map((m) => ({ role: m.role, content: m.file ? `Arquivo anexado "${m.file.name}":\n\n${m.file.text}\n\n---\n\n${m.content}` : m.content }));
+      let thinking = "";
+      await streamClaude({
+        apiKey: state.settings.apiKey,
+        model,
+        system: state.settings.system || DEFAULT_SYSTEM,
+        messages: history,
+        deep: state.deep,
+        signal: ctrl.signal,
+        onText,
+        onThinking: (t) => {
+          if (!thinking) renderThinking(el, "", true);
+          thinking += t;
+          am.thinking = thinking;
+          el.querySelector(".think-body").textContent = thinking;
+        },
+      });
+      if (thinking) renderThinking(el, thinking, false);
+    }
+  } catch (err) {
+    if (err?.name !== "AbortError" && !ctrl.signal.aborted) {
+      const { describeError } = await import("./claude.js").catch(() => ({ describeError: (e) => e.message }));
+      am.error = describeError(err) || "Algo deu errado.";
+    }
+  } finally {
+    cancelAnimationFrame(raf);
+    chatEl().removeEventListener("scroll", onScroll);
+    el.classList.remove("streaming");
+    if (am.error && !am.content) showError(el, am.error);
+    else mdEl.innerHTML = renderMarkdown(am.content || "_(resposta interrompida)_");
+    if (!am.content && !am.error) am.content = "_(resposta interrompida)_";
+    fillActions(el, am);
+    chat.messages.push(am);
+    chat.updated = Date.now();
+    saveChats();
+    setBusy(null);
+    if (follow) scrollToEnd();
+  }
+}
+
+function setBusy(ctrl) {
+  state.busy = ctrl;
+  $("#composer").classList.toggle("busy", !!ctrl);
+  $("#send").classList.toggle("stop", !!ctrl);
+  $("#send").setAttribute("aria-label", ctrl ? "Parar" : "Enviar");
+  updateSendState();
+}
+
+function updateSendState() {
+  $("#send").disabled = !state.busy && !$("#input").value.trim() && !state.pendingFile;
+}
+
+function autosize() {
+  const ta = $("#input");
+  ta.style.height = "auto";
+  ta.style.height = Math.min(ta.scrollHeight, 220) + "px";
+  updateSendState();
+}
+
+/* ---------- anexos ---------- */
+function clearAttachment() {
+  state.pendingFile = null;
+  $("#attachments").innerHTML = "";
+  updateSendState();
+}
+
+async function attach(file) {
+  if (!file) return;
+  if (file.size > 200_000) { toast("Arquivo muito grande (máx. 200 KB)."); return; }
+  const text = await file.text();
+  state.pendingFile = { name: file.name, text };
+  const chip = document.createElement("div");
+  chip.className = "att";
+  chip.innerHTML = ICON.file;
+  chip.append(file.name);
+  const x = document.createElement("button");
+  x.type = "button";
+  x.innerHTML = ICON.x;
+  x.setAttribute("aria-label", "Remover anexo");
+  x.onclick = clearAttachment;
+  chip.append(x);
+  $("#attachments").replaceChildren(chip);
+  updateSendState();
+  $("#input").focus();
+}
+
+/* ---------- sidebar ---------- */
+const isMobile = () => matchMedia("(max-width: 860px)").matches;
+function closeSidebarMobile() { $("#app").classList.remove("side-open"); }
+function toggleSidebar(open) {
+  const app = $("#app");
+  if (isMobile()) app.classList.toggle("side-open", open);
+  else app.classList.toggle("side-collapsed", !open);
+}
+
+/* ---------- configurações ---------- */
+function openSettings() {
+  $("#s-name").value = state.settings.name || "";
+  $("#s-key").value = state.settings.apiKey || "";
+  $("#s-system").value = state.settings.system || DEFAULT_SYSTEM;
+  $("#s-motion").checked = !!state.settings.reduceMotion;
+  $("#settings").classList.add("open");
+  $("#settings").setAttribute("aria-hidden", "false");
+  setTimeout(() => $("#s-name").focus(), 50);
+}
+function closeSettings() {
+  $("#settings").classList.remove("open");
+  $("#settings").setAttribute("aria-hidden", "true");
+}
+function applyMotion() { document.body.classList.toggle("reduce-motion", !!state.settings.reduceMotion); }
+
+/* ---------- menus ---------- */
+function closeMenus(except) { $$(".menu.open").forEach((m) => m !== except && m.classList.remove("open")); }
+
+/* =========================================================
+   Eventos
+   ========================================================= */
+function bind() {
+  const input = $("#input");
+  input.addEventListener("input", autosize);
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); send(input.value); }
+  });
+  $("#composer").addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (state.busy) state.busy.abort();
+    else send(input.value);
+  });
+  $("#file").addEventListener("change", (e) => { attach(e.target.files[0]); e.target.value = ""; });
+  $("#composer").addEventListener("dragover", (e) => e.preventDefault());
+  $("#composer").addEventListener("drop", (e) => { e.preventDefault(); attach(e.dataTransfer.files[0]); });
+
+  $("#think-toggle").addEventListener("click", (e) => {
+    state.deep = !state.deep;
+    e.currentTarget.setAttribute("aria-pressed", state.deep);
+    toast(state.deep ? "Raciocínio profundo ativado" : "Raciocínio profundo desativado", 1600);
+  });
+
+  $("#suggestions").addEventListener("click", (e) => {
+    const b = e.target.closest(".sugg");
+    if (b) send(b.dataset.q);
+  });
+  $("#suggestions").addEventListener("pointermove", (e) => {
+    const b = e.target.closest(".sugg");
+    if (!b) return;
+    const r = b.getBoundingClientRect();
+    b.style.setProperty("--mx", `${e.clientX - r.left}px`);
+    b.style.setProperty("--my", `${e.clientY - r.top}px`);
+  });
+
+  $("#new-chat").addEventListener("click", () => openChat(null));
+  $("#search").addEventListener("input", renderHistory);
+  $("#history").addEventListener("click", (e) => {
+    const del = e.target.closest("[data-del]");
+    if (del) {
+      e.stopPropagation();
+      state.chats = state.chats.filter((c) => c.id !== del.dataset.del);
+      saveChats();
+      if (state.currentId === del.dataset.del) openChat(null); else renderHistory();
+      toast("Conversa apagada");
+      return;
+    }
+    const item = e.target.closest(".h-item");
+    if (item) openChat(item.dataset.id);
+  });
+
+  $("#open-side").addEventListener("click", () => toggleSidebar(true));
+  $("#close-side").addEventListener("click", () => toggleSidebar(false));
+  $("#scrim").addEventListener("click", closeSidebarMobile);
+
+  // menus
+  $("#user-chip").addEventListener("click", (e) => { e.stopPropagation(); const m = $("#user-menu"); closeMenus(m); m.classList.toggle("open"); });
+  $("#model-pill").addEventListener("click", (e) => { e.stopPropagation(); const m = $("#model-menu"); closeMenus(m); m.classList.toggle("open"); });
+  document.addEventListener("click", () => closeMenus());
+  $("#model-menu").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-model]");
+    if (!b) return;
+    state.settings.model = b.dataset.model;
+    saveSettings();
+    renderModel();
+    if (b.dataset.model !== "demo" && !state.settings.apiKey) { toast("Este modelo precisa de uma chave da API."); openSettings(); }
+    else toast(`Modelo: ${MODELS.find((x) => x.id === b.dataset.model).label}`, 1600);
+  });
+  $("#user-menu").addEventListener("click", (e) => {
+    const a = e.target.closest("[data-action]")?.dataset.action;
+    if (a === "settings") openSettings();
+    if (a === "clear") {
+      if (confirm("Apagar todas as conversas deste navegador?")) { state.chats = []; saveChats(); openChat(null); toast("Histórico limpo"); }
+    }
+    if (a === "logout") {
+      store.del("miq.user");
+      state.user = null;
+      if (state.busy) state.busy.abort();
+      const app = $("#app");
+      app.style.transition = "opacity .4s, filter .4s";
+      app.style.opacity = "0";
+      app.style.filter = "blur(16px)";
+      setTimeout(() => {
+        app.classList.add("hidden");
+        app.style.cssText = "";
+        $("#login").classList.remove("hidden");
+        $("#login-submit").classList.remove("loading");
+        $("#login-submit").disabled = false;
+        $("#f-pass").value = "";
+        splitTitle();
+      }, 420);
+    }
+  });
+
+  // mensagens: ações e copiar código
+  $("#messages").addEventListener("click", async (e) => {
+    const cc = e.target.closest("[data-copy-code]");
+    if (cc) {
+      await navigator.clipboard?.writeText(cc.closest(".codeblock").querySelector("code").innerText).catch(() => {});
+      cc.innerHTML = `${ICON.check}Copiado`;
+      setTimeout(() => (cc.innerHTML = `${ICON.copy}Copiar`), 1500);
+      return;
+    }
+    const btn = e.target.closest("[data-act]");
+    if (!btn) return;
+    const msgEl = btn.closest(".msg");
+    const chat = current();
+    const aiEls = $$(".msg.ai", $("#messages"));
+    const aiMsgs = chat.messages.filter((m) => m.role === "assistant");
+    const m = aiMsgs[aiEls.indexOf(msgEl)];
+    if (!m) return;
+    const act = btn.dataset.act;
+    if (act === "copy") {
+      await navigator.clipboard?.writeText(m.content).catch(() => {});
+      btn.innerHTML = ICON.check;
+      setTimeout(() => (btn.innerHTML = ICON.copy), 1400);
+    } else if (act === "up" || act === "down") {
+      const v = act === "up" ? 1 : -1;
+      m.rating = m.rating === v ? 0 : v;
+      saveChats();
+      fillActions(msgEl, m);
+      if (m.rating) toast("Obrigado pelo feedback!", 1400);
+    } else if (act === "speak") {
+      if (!("speechSynthesis" in window)) return toast("Seu navegador não suporta leitura em voz alta.");
+      if (speechSynthesis.speaking) { speechSynthesis.cancel(); return; }
+      const u = new SpeechSynthesisUtterance(msgEl.querySelector(".md").innerText);
+      u.lang = "pt-BR";
+      speechSynthesis.speak(u);
+    } else if (act === "redo") {
+      if (state.busy) return;
+      const idx = chat.messages.indexOf(m);
+      chat.messages.splice(idx); // remove esta resposta e as seguintes
+      $$(".msg", $("#messages")).slice(idx).forEach((n) => n.remove());
+      send("", { regenerate: true });
+    }
+  });
+
+  chatEl().addEventListener("scroll", () => {
+    $("#scroll-down").classList.toggle("show", !nearBottom() && !!current());
+  });
+  $("#scroll-down").addEventListener("click", () => scrollToEnd());
+
+  $("#share-btn").addEventListener("click", () => {
+    const chat = current();
+    if (!chat) return toast("Comece uma conversa para exportar.");
+    const md = `# ${chat.title}\n\n` + chat.messages.map((m) => `**${m.role === "user" ? "Você" : "Miquéias"}:**\n\n${m.content}`).join("\n\n---\n\n");
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([md], { type: "text/markdown" }));
+    a.download = `${chat.title.replace(/[^\p{L}\p{N}]+/gu, "-").slice(0, 40) || "conversa"}.md`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+    toast("Conversa exportada em Markdown");
+  });
+
+  // configurações
+  $$("#settings [data-close]").forEach((b) => b.addEventListener("click", closeSettings));
+  $("#settings").addEventListener("click", (e) => { if (e.target.id === "settings") closeSettings(); });
+  $("#s-save").addEventListener("click", () => {
+    state.settings.name = $("#s-name").value.trim();
+    state.settings.apiKey = $("#s-key").value.trim();
+    state.settings.system = $("#s-system").value.trim() || DEFAULT_SYSTEM;
+    state.settings.reduceMotion = $("#s-motion").checked;
+    if (state.settings.apiKey && state.settings.model === "demo") state.settings.model = "claude-opus-5-5";
+    if (!state.settings.apiKey && state.settings.model !== "demo") state.settings.model = "demo";
+    saveSettings();
+    applyMotion();
+    renderUser();
+    renderModel();
+    if (!current()) typeGreeting();
+    closeSettings();
+    toast("Configurações salvas");
+  });
+
+  // atalhos
+  document.addEventListener("keydown", (e) => {
+    if ($("#app").classList.contains("hidden")) return;
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") { e.preventDefault(); openChat(null); $("#input").focus(); }
+    if (e.key === "Escape") { closeMenus(); closeSettings(); closeSidebarMobile(); }
+  });
+}
+
+/* =========================================================
+   Início
+   ========================================================= */
+applyMotion();
+startBackground();
+initLogin();
+bind();
+if (state.user) {
+  $("#login").classList.add("hidden");
+  showApp();
+}
