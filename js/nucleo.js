@@ -114,7 +114,8 @@ export function createNucleo({ root, toast, store, brain, getLink, tellAgent, ro
     try {
       const r = await tellAgent("horacio", text);
       if (r?.reply) add({ kind: "in", who: "horacio", text: r.reply });
-      else add({ kind: "sys", text: "Entregue ao Horácio. Ele ainda não tem a ação de conversa (chat.say), então não respondeu." });
+      else if (r?.pending) add({ kind: "sys", text: "Entregue. O Horácio ainda não respondeu: por enquanto quem responde por ele é o Sr. Nathanael, na conversa do Horácio. A resposta aparece aqui quando chegar." });
+      else add({ kind: "sys", text: "Entregue ao Horácio como aviso (ele não tem a ação de conversa chat.say, então não responde)." });
     } catch (e) {
       add({ kind: "sys", text: `Não entreguei: ${e.message}` });
     }

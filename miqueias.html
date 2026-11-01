@@ -2941,7 +2941,7 @@ function createBrain(d) {
       }
       case "avisar_horacio": {
         const r = await d.tellAgent("horacio", a.text);
-        return { detail: "Mandei a mensagem ao Horácio.", data: r, text: r?.reply ? `O Horácio respondeu: ${r.reply}` : "Mensagem entregue ao Horácio." };
+        return { detail: "Mandei a mensagem ao Horácio.", data: r, text: r?.reply ? `O Horácio respondeu: ${r.reply}` : r?.pending ? "Mensagem entregue ao Horácio. Ele ainda não respondeu; a resposta vai aparecer no Núcleo quando chegar." : "Mensagem entregue ao Horácio." };
       }
       case "agentes": {
         const list = await d.roster();
@@ -3163,7 +3163,8 @@ function createNucleo({ root, toast, store, brain, getLink, tellAgent, roster })
     try {
       const r = await tellAgent("horacio", text);
       if (r?.reply) add({ kind: "in", who: "horacio", text: r.reply });
-      else add({ kind: "sys", text: "Entregue ao Horácio. Ele ainda não tem a ação de conversa (chat.say), então não respondeu." });
+      else if (r?.pending) add({ kind: "sys", text: "Entregue. O Horácio ainda não respondeu: por enquanto quem responde por ele é o Sr. Nathanael, na conversa do Horácio. A resposta aparece aqui quando chegar." });
+      else add({ kind: "sys", text: "Entregue ao Horácio como aviso (ele não tem a ação de conversa chat.say, então não responde)." });
     } catch (e) {
       add({ kind: "sys", text: `Não entreguei: ${e.message}` });
     }
@@ -4357,6 +4358,7 @@ lab = createTradeLab({
 });
 
 /* ---------- conversa com outros agentes pelo Asafe ---------- */
+const awaiting = {}; // agente → mensagem do Miquéias ainda sem resposta
 async function rosterSafe() {
   const link = window.miqueiasAsafe;
   if (!link || link.status !== "online") return [];
@@ -4369,7 +4371,10 @@ async function tellAgent(to, text) {
   const acts = (ag?.actions || []).map((a) => a.name || a);
   if (acts.includes("chat.say")) {
     const r = await link.request(to, "chat.say", { text, from: "miqueias" }, { timeout: 90000 });
-    return { reply: r?.reply ?? r?.text ?? null };
+    const reply = r?.reply ?? r?.text ?? null;
+    // Sem resposta a tempo (quem responde pelo Horácio é o Sr. Nathanael): a resposta chega depois por agent.say
+    if (!reply) awaiting[to] = { t: Date.now(), text };
+    return { reply, pending: !reply, note: r?.note || null };
   }
   await link.request(to, "notify", { text: `Miquéias: ${text}` }, { timeout: 10000 });
   return { reply: null };
@@ -4534,6 +4539,15 @@ function connectAsafe() {
           text = String(text || "").trim();
           if (!text) throw asafeError("bad_request", "Mensagem vazia.");
           nucleo.log({ kind: "in", who: ctx.from, text });
+          // Resposta atrasada a uma mensagem do Miquéias: só confirma, sem puxar conversa nova
+          const wait = awaiting[ctx.from];
+          if (wait && Date.now() - wait.t < 30 * 60000) {
+            delete awaiting[ctx.from];
+            toast(`${agentName(ctx.from)} respondeu no Núcleo`);
+            const reply = "Recebi sua resposta, obrigado.";
+            nucleo.log({ kind: "out", text: reply });
+            return { reply };
+          }
           let reply;
           const steps = brain.parse(text);
           if (steps.length && !steps.some((x) => x.id === "pesquisar")) {

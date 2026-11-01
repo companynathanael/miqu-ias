@@ -1045,6 +1045,7 @@ lab = createTradeLab({
 });
 
 /* ---------- conversa com outros agentes pelo Asafe ---------- */
+const awaiting = {}; // agente → mensagem do Miquéias ainda sem resposta
 async function rosterSafe() {
   const link = window.miqueiasAsafe;
   if (!link || link.status !== "online") return [];
@@ -1057,7 +1058,10 @@ async function tellAgent(to, text) {
   const acts = (ag?.actions || []).map((a) => a.name || a);
   if (acts.includes("chat.say")) {
     const r = await link.request(to, "chat.say", { text, from: "miqueias" }, { timeout: 90000 });
-    return { reply: r?.reply ?? r?.text ?? null };
+    const reply = r?.reply ?? r?.text ?? null;
+    // Sem resposta a tempo (quem responde pelo Horácio é o Sr. Nathanael): a resposta chega depois por agent.say
+    if (!reply) awaiting[to] = { t: Date.now(), text };
+    return { reply, pending: !reply, note: r?.note || null };
   }
   await link.request(to, "notify", { text: `Miquéias: ${text}` }, { timeout: 10000 });
   return { reply: null };
@@ -1222,6 +1226,15 @@ function connectAsafe() {
           text = String(text || "").trim();
           if (!text) throw asafeError("bad_request", "Mensagem vazia.");
           nucleo.log({ kind: "in", who: ctx.from, text });
+          // Resposta atrasada a uma mensagem do Miquéias: só confirma, sem puxar conversa nova
+          const wait = awaiting[ctx.from];
+          if (wait && Date.now() - wait.t < 30 * 60000) {
+            delete awaiting[ctx.from];
+            toast(`${agentName(ctx.from)} respondeu no Núcleo`);
+            const reply = "Recebi sua resposta, obrigado.";
+            nucleo.log({ kind: "out", text: reply });
+            return { reply };
+          }
           let reply;
           const steps = brain.parse(text);
           if (steps.length && !steps.some((x) => x.id === "pesquisar")) {

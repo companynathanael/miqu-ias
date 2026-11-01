@@ -191,7 +191,7 @@ export function createBrain(d) {
       }
       case "avisar_horacio": {
         const r = await d.tellAgent("horacio", a.text);
-        return { detail: "Mandei a mensagem ao Horácio.", data: r, text: r?.reply ? `O Horácio respondeu: ${r.reply}` : "Mensagem entregue ao Horácio." };
+        return { detail: "Mandei a mensagem ao Horácio.", data: r, text: r?.reply ? `O Horácio respondeu: ${r.reply}` : r?.pending ? "Mensagem entregue ao Horácio. Ele ainda não respondeu; a resposta vai aparecer no Núcleo quando chegar." : "Mensagem entregue ao Horácio." };
       }
       case "agentes": {
         const list = await d.roster();
