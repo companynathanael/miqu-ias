@@ -11,7 +11,7 @@ Interface de IA moderna, inspirada no ChatGPT e no Claude, no tema **preto + cia
 - **Raciocínio profundo**: mostra as etapas de pensamento antes da resposta
 - **Histórico** salvo no navegador, agrupado por data, com busca e exclusão
 - Ações por resposta: copiar, ouvir em voz alta, curtir/descurtir, gerar novamente
-- Anexo de arquivos de texto (arrastar e soltar), exportar conversa em Markdown
+- Anexo de arquivos de texto (arrastar e soltar), copiar a conversa em Markdown
 - Seletor de modelo, configurações (nome, chave da API, personalidade), opção de reduzir animações
 - Responsivo (menu lateral vira gaveta no celular), atalho `Ctrl/Cmd + K` para nova conversa
 
@@ -43,3 +43,8 @@ js/demo.js        respostas do modo demonstração
 js/claude.js      integração com a API do Claude (streaming)
 assets/           logo (SVG + imagem original)
 ```
+
+## Arquivo único
+
+`miqueias.html` traz o site inteiro (HTML, CSS e JS) em um só arquivo: basta abrir com dois cliques, sem servidor.
+Ele é gerado a partir dos arquivos em `css/` e `js/`; edite-os e gere de novo quando mudar algo.

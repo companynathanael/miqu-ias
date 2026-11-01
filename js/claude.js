@@ -1,6 +1,6 @@
 // Integração opcional com a API da Anthropic (Claude) direto do navegador.
 // O SDK oficial é carregado sob demanda, só quando o usuário configura uma chave.
-const SDK_URL = "https://esm.sh/@anthropic-ai/sdk@0.135.0";
+const SDK_URL = "https://cdn.jsdelivr.net/npm/@anthropic-ai/sdk@0.135.0/+esm";
 
 let clientCache = { key: null, client: null };
 

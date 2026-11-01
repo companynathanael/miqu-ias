@@ -695,7 +695,9 @@ function bind() {
     const a = e.target.closest("[data-action]")?.dataset.action;
     if (a === "settings") openSettings();
     if (a === "clear") {
-      if (confirm("Apagar todas as conversas deste navegador?")) { state.chats = []; saveChats(); openChat(null); toast("Histórico limpo"); }
+      const now = Date.now();
+      if (now - (state.clearAsk || 0) < 4000) { state.chats = []; saveChats(); openChat(null); toast("Histórico limpo"); state.clearAsk = 0; }
+      else { state.clearAsk = now; toast("Clique em “Limpar histórico” de novo para confirmar."); return; }
     }
     if (a === "logout") {
       store.del("miq.user");
@@ -769,12 +771,9 @@ function bind() {
     const chat = current();
     if (!chat) return toast("Comece uma conversa para exportar.");
     const md = `# ${chat.title}\n\n` + chat.messages.map((m) => `**${m.role === "user" ? "Você" : "Miquéias"}:**\n\n${m.content}`).join("\n\n---\n\n");
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(new Blob([md], { type: "text/markdown" }));
-    a.download = `${chat.title.replace(/[^\p{L}\p{N}]+/gu, "-").slice(0, 40) || "conversa"}.md`;
-    a.click();
-    URL.revokeObjectURL(a.href);
-    toast("Conversa exportada em Markdown");
+    navigator.clipboard?.writeText(md)
+      .then(() => toast("Conversa copiada em Markdown"))
+      .catch(() => toast("Não foi possível copiar. Tente novamente."));
   });
 
   // configurações
