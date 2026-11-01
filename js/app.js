@@ -1221,14 +1221,14 @@ function connectAsafe() {
         },
       },
       "agent.say": {
-        desc: "Conversa com o núcleo do Miquéias: a mensagem aparece no painel Núcleo e volta uma resposta. payload: { text }",
-        handler: async ({ text }, ctx) => {
+        desc: "Conversa com o núcleo do Miquéias: a mensagem aparece no painel Núcleo e volta uma resposta. payload: { text, inReplyTo? } (inReplyTo: true = resposta atrasada a uma mensagem do Miquéias)",
+        handler: async ({ text, inReplyTo }, ctx) => {
           text = String(text || "").trim();
           if (!text) throw asafeError("bad_request", "Mensagem vazia.");
           nucleo.log({ kind: "in", who: ctx.from, text });
           // Resposta atrasada a uma mensagem do Miquéias: só confirma, sem puxar conversa nova
           const wait = awaiting[ctx.from];
-          if (wait && Date.now() - wait.t < 30 * 60000) {
+          if (inReplyTo === true || (wait && Date.now() - wait.t < 30 * 60000)) {
             delete awaiting[ctx.from];
             toast(`${agentName(ctx.from)} respondeu no Núcleo`);
             const reply = "Recebi sua resposta, obrigado.";
