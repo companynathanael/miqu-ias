@@ -681,6 +681,61 @@ kbd { margin-left: auto; font-size: 10.5px; color: var(--muted); border: 1px sol
   .tl-grid, .tl-grid.study { grid-template-columns: minmax(0, 1fr); }
 }
 
+/* =========================================================
+   NÚCLEO e ações do cérebro
+   ========================================================= */
+#app[data-view="nucleo"] .chat, #app[data-view="nucleo"] .composer-wrap { display: none; }
+.nc-wrap { max-width: 1180px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; animation: blurInUp .6s var(--ease) both; }
+.nc-head-note { color: var(--muted); }
+.nc-status { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.nc-stat { border-radius: var(--r-lg); padding: 14px 16px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.nc-stat small { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted-2); }
+.nc-stat b { font-size: 18px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.nc-stat b::before { content: ""; width: 8px; height: 8px; border-radius: 3px; background: var(--muted-2); }
+.nc-stat b.on::before { background: var(--cyan); box-shadow: 0 0 10px var(--cyan); animation: pulse 2s infinite; }
+.nc-stat b.off::before { background: var(--danger); }
+.nc-stat span { font-size: 12px; color: var(--muted); }
+.nc-grid { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); }
+.nc-chat { display: flex; flex-direction: column; gap: 10px; }
+.nc-feed { list-style: none; display: flex; flex-direction: column; gap: 8px; height: clamp(280px, 48vh, 520px); overflow-y: auto; padding-right: 4px; scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+.nc-feed .fresh { animation: blurInUp .45s var(--ease) both; }
+.nc-empty { color: var(--muted); font-size: 13px; padding: 10px; }
+.nc-msg { display: flex; }
+.nc-msg.out { justify-content: flex-end; }
+.nc-bubble { max-width: 82%; padding: 9px 13px; border-radius: 16px 16px 16px 6px; background: var(--glass-soft); border: 1px solid var(--glass-border); box-shadow: inset 0 1px 0 rgba(255,255,255,.06); }
+.nc-msg.out .nc-bubble { border-radius: 16px 16px 6px 16px; background: linear-gradient(135deg, rgba(0,229,255,.18), rgba(255,255,255,.04)); border-color: rgba(0,229,255,.28); }
+.nc-bubble b { display: block; font-size: 11.5px; font-weight: 600; color: var(--cyan); margin-bottom: 2px; }
+.nc-msg.in .nc-bubble b { color: #ffd166; }
+.nc-bubble p { font-size: 13.5px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.nc-bubble time, .nc-op time, .nc-sys time { white-space: nowrap; font-size: 10.5px; color: var(--muted-2); font-variant-numeric: tabular-nums; }
+.nc-bubble time { display: block; text-align: right; margin-top: 2px; }
+.nc-op, .nc-sys { display: flex; align-items: baseline; gap: 8px; font-size: 12.5px; color: #b9cdd2; padding: 6px 10px; border-radius: 10px; background: rgba(255,255,255,.02); border-left: 2px solid var(--muted-2); overflow-wrap: anywhere; }
+.nc-op.ok { border-left-color: var(--cyan); }
+.nc-op.err { border-left-color: var(--danger); color: #f3c3cc; }
+.nc-sys { color: var(--muted); font-style: italic; }
+.nc-act { font-size: 11px; padding: 1px 7px; border-radius: 6px; background: rgba(0,229,255,.1); color: var(--cyan); white-space: nowrap; font-style: normal; }
+.nc-op.err .nc-act { background: rgba(255,92,122,.12); color: var(--danger); }
+.nc-compose { display: flex; gap: 8px; align-items: center; padding: 6px 6px 6px 14px; border-radius: 16px; background: rgba(0,0,0,.35); border: 1px solid var(--glass-border); transition: border-color .2s; }
+.nc-compose:focus-within { border-color: rgba(0,229,255,.4); }
+.nc-compose input { flex: 1; min-width: 0; background: none; border: 0; outline: none; font-size: 14px; padding: 8px 0; }
+.nc-compose .send { width: 36px; height: 36px; border-radius: 11px; }
+.nc-quick { display: flex; flex-wrap: wrap; gap: 6px; }
+.nc-guide { display: flex; flex-direction: column; gap: 8px; }
+.nc-tips { margin: 0 0 8px 18px; font-size: 13px; color: #c6d7db; display: flex; flex-direction: column; gap: 5px; }
+.nc-tips li::marker { color: var(--cyan); }
+.nc-intents { list-style: none; display: flex; flex-direction: column; gap: 6px; max-height: 360px; overflow-y: auto; scrollbar-width: thin; }
+.nc-intents li { display: flex; flex-direction: column; gap: 3px; padding: 8px 10px; border-radius: 10px; background: rgba(255,255,255,.025); font-size: 12.5px; color: #c6d7db; }
+.nc-intents em { font-style: normal; font-size: 10.5px; padding: 1px 6px; border-radius: 6px; background: rgba(255,209,102,.1); color: #ffd166; margin-left: 4px; }
+.nc-intents code { font-size: 12px; color: var(--cyan-3); }
+.tool-slot:empty { display: none; }
+.tool-slot { display: flex; flex-wrap: wrap; gap: 6px; margin: 2px 0 10px; }
+.act-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; padding: 4px 10px 4px 7px; border-radius: 10px; background: rgba(0,229,255,.08); border: 1px solid rgba(0,229,255,.25); color: #cdf6fb; animation: blurInUp .4s var(--ease) both; }
+.act-chip svg { width: 15px; height: 15px; color: var(--cyan); }
+.act-chip.err { background: rgba(255,92,122,.08); border-color: rgba(255,92,122,.3); color: #f3c3cc; }
+.act-chip.err svg { color: var(--danger); }
+@media (max-width: 980px) { .nc-grid { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 560px) { .nc-status { grid-template-columns: minmax(0, 1fr); } }
+
 /* aviso "Horácio está operando" no visual do Miquéias */
 .asafe-ui-banner { font-family: var(--font) !important; background: linear-gradient(155deg, rgba(30,40,46,.82), rgba(6,12,15,.9)) !important; border-color: rgba(0,229,255,.35) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.1), 0 14px 40px -12px var(--cyan-glow) !important; top: max(14px, env(safe-area-inset-top, 0px)) !important; }
 .asafe-ui-banner i { background: var(--cyan) !important; box-shadow: 0 0 10px var(--cyan); }

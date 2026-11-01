@@ -697,6 +697,61 @@ kbd { margin-left: auto; font-size: 10.5px; color: var(--muted); border: 1px sol
   .tl-grid, .tl-grid.study { grid-template-columns: minmax(0, 1fr); }
 }
 
+/* =========================================================
+   NÚCLEO e ações do cérebro
+   ========================================================= */
+#app[data-view="nucleo"] .chat, #app[data-view="nucleo"] .composer-wrap { display: none; }
+.nc-wrap { max-width: 1180px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; animation: blurInUp .6s var(--ease) both; }
+.nc-head-note { color: var(--muted); }
+.nc-status { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.nc-stat { border-radius: var(--r-lg); padding: 14px 16px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.nc-stat small { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted-2); }
+.nc-stat b { font-size: 18px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.nc-stat b::before { content: ""; width: 8px; height: 8px; border-radius: 3px; background: var(--muted-2); }
+.nc-stat b.on::before { background: var(--cyan); box-shadow: 0 0 10px var(--cyan); animation: pulse 2s infinite; }
+.nc-stat b.off::before { background: var(--danger); }
+.nc-stat span { font-size: 12px; color: var(--muted); }
+.nc-grid { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); }
+.nc-chat { display: flex; flex-direction: column; gap: 10px; }
+.nc-feed { list-style: none; display: flex; flex-direction: column; gap: 8px; height: clamp(280px, 48vh, 520px); overflow-y: auto; padding-right: 4px; scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+.nc-feed .fresh { animation: blurInUp .45s var(--ease) both; }
+.nc-empty { color: var(--muted); font-size: 13px; padding: 10px; }
+.nc-msg { display: flex; }
+.nc-msg.out { justify-content: flex-end; }
+.nc-bubble { max-width: 82%; padding: 9px 13px; border-radius: 16px 16px 16px 6px; background: var(--glass-soft); border: 1px solid var(--glass-border); box-shadow: inset 0 1px 0 rgba(255,255,255,.06); }
+.nc-msg.out .nc-bubble { border-radius: 16px 16px 6px 16px; background: linear-gradient(135deg, rgba(0,229,255,.18), rgba(255,255,255,.04)); border-color: rgba(0,229,255,.28); }
+.nc-bubble b { display: block; font-size: 11.5px; font-weight: 600; color: var(--cyan); margin-bottom: 2px; }
+.nc-msg.in .nc-bubble b { color: #ffd166; }
+.nc-bubble p { font-size: 13.5px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.nc-bubble time, .nc-op time, .nc-sys time { white-space: nowrap; font-size: 10.5px; color: var(--muted-2); font-variant-numeric: tabular-nums; }
+.nc-bubble time { display: block; text-align: right; margin-top: 2px; }
+.nc-op, .nc-sys { display: flex; align-items: baseline; gap: 8px; font-size: 12.5px; color: #b9cdd2; padding: 6px 10px; border-radius: 10px; background: rgba(255,255,255,.02); border-left: 2px solid var(--muted-2); overflow-wrap: anywhere; }
+.nc-op.ok { border-left-color: var(--cyan); }
+.nc-op.err { border-left-color: var(--danger); color: #f3c3cc; }
+.nc-sys { color: var(--muted); font-style: italic; }
+.nc-act { font-size: 11px; padding: 1px 7px; border-radius: 6px; background: rgba(0,229,255,.1); color: var(--cyan); white-space: nowrap; font-style: normal; }
+.nc-op.err .nc-act { background: rgba(255,92,122,.12); color: var(--danger); }
+.nc-compose { display: flex; gap: 8px; align-items: center; padding: 6px 6px 6px 14px; border-radius: 16px; background: rgba(0,0,0,.35); border: 1px solid var(--glass-border); transition: border-color .2s; }
+.nc-compose:focus-within { border-color: rgba(0,229,255,.4); }
+.nc-compose input { flex: 1; min-width: 0; background: none; border: 0; outline: none; font-size: 14px; padding: 8px 0; }
+.nc-compose .send { width: 36px; height: 36px; border-radius: 11px; }
+.nc-quick { display: flex; flex-wrap: wrap; gap: 6px; }
+.nc-guide { display: flex; flex-direction: column; gap: 8px; }
+.nc-tips { margin: 0 0 8px 18px; font-size: 13px; color: #c6d7db; display: flex; flex-direction: column; gap: 5px; }
+.nc-tips li::marker { color: var(--cyan); }
+.nc-intents { list-style: none; display: flex; flex-direction: column; gap: 6px; max-height: 360px; overflow-y: auto; scrollbar-width: thin; }
+.nc-intents li { display: flex; flex-direction: column; gap: 3px; padding: 8px 10px; border-radius: 10px; background: rgba(255,255,255,.025); font-size: 12.5px; color: #c6d7db; }
+.nc-intents em { font-style: normal; font-size: 10.5px; padding: 1px 6px; border-radius: 6px; background: rgba(255,209,102,.1); color: #ffd166; margin-left: 4px; }
+.nc-intents code { font-size: 12px; color: var(--cyan-3); }
+.tool-slot:empty { display: none; }
+.tool-slot { display: flex; flex-wrap: wrap; gap: 6px; margin: 2px 0 10px; }
+.act-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; padding: 4px 10px 4px 7px; border-radius: 10px; background: rgba(0,229,255,.08); border: 1px solid rgba(0,229,255,.25); color: #cdf6fb; animation: blurInUp .4s var(--ease) both; }
+.act-chip svg { width: 15px; height: 15px; color: var(--cyan); }
+.act-chip.err { background: rgba(255,92,122,.08); border-color: rgba(255,92,122,.3); color: #f3c3cc; }
+.act-chip.err svg { color: var(--danger); }
+@media (max-width: 980px) { .nc-grid { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 560px) { .nc-status { grid-template-columns: minmax(0, 1fr); } }
+
 /* aviso "Horácio está operando" no visual do Miquéias */
 .asafe-ui-banner { font-family: var(--font) !important; background: linear-gradient(155deg, rgba(30,40,46,.82), rgba(6,12,15,.9)) !important; border-color: rgba(0,229,255,.35) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.1), 0 14px 40px -12px var(--cyan-glow) !important; top: max(14px, env(safe-area-inset-top, 0px)) !important; }
 .asafe-ui-banner i { background: var(--cyan) !important; box-shadow: 0 0 10px var(--cyan); }
@@ -843,7 +898,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
         </button>
       </div>
 
-      <button class="btn new-chat" id="new-chat">
+      <button class="btn new-chat" id="new-chat" data-asafe-name="Nova conversa">
         <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
         Nova conversa
         <kbd>Ctrl K</kbd>
@@ -856,20 +911,24 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
 
       <nav class="skills" id="skills" aria-label="Habilidades">
         <div class="h-group">Habilidades</div>
-        <button class="skill-item" data-skill="research">
+        <button class="skill-item" data-skill="research" data-asafe-name="Pesquisa">
           <span class="sk-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></span>
           <span><b>Pesquisa</b><small>Busca na web com fontes</small></span>
         </button>
-        <button class="skill-item" data-skill="trade">
+        <button class="skill-item" data-skill="trade" data-asafe-name="Laboratório de Trade">
           <span class="sk-ic"><svg viewBox="0 0 24 24"><path d="M4 19V5M4 19h16"/><path d="m7 15 4-4 3 3 5-6"/></svg></span>
           <span><b>Laboratório de Trade</b><small>Estuda e pratica com dinheiro fictício</small></span>
+        </button>
+        <button class="skill-item" data-skill="nucleo" data-asafe-name="Núcleo">
+          <span class="sk-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.5"/><circle cx="5" cy="6" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="12" cy="20" r="2"/><path d="M6.6 7.2 10 10.6M17.4 7.2 14 10.6M12 14.5V18"/></svg></span>
+          <span><b>Núcleo</b><small>Conversa com o Horácio</small></span>
         </button>
       </nav>
 
       <nav class="history" id="history" aria-label="Histórico"></nav>
 
       <div class="side-foot">
-        <button class="user-chip" id="user-chip">
+        <button class="user-chip" id="user-chip" data-asafe-name="Conta">
           <span class="avatar" id="avatar">M</span>
           <span class="user-meta">
             <strong id="user-name">Convidado</strong>
@@ -900,7 +959,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
         <button class="icon-btn" id="open-side" aria-label="Abrir menu">
           <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
         </button>
-        <button class="model-pill" id="model-pill" aria-haspopup="true">
+        <button class="model-pill" id="model-pill" aria-haspopup="true" data-asafe-name="Modelo">
           <span class="pulse"></span>
           <span id="model-label">Miquéias 2 · Demo</span>
           <svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
@@ -926,6 +985,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
       </div>
 
       <section class="lab hidden" id="lab" aria-label="Laboratório de Trade"></section>
+      <section class="lab hidden" id="nucleo" aria-label="Núcleo"></section>
 
       <div class="composer-wrap">
         <button class="scroll-down" id="scroll-down" aria-label="Rolar para o fim">
@@ -949,7 +1009,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
                 Raciocínio profundo
               </button>
             </div>
-            <button type="submit" class="send" id="send" aria-label="Enviar">
+            <button type="submit" class="send" id="send" aria-label="Enviar" data-asafe-name="Enviar">
               <svg class="i-send" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
               <svg class="i-stop" viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="2"/></svg>
             </button>
@@ -1234,7 +1294,9 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
    - o aviso "está operando" e o cursor aparecem sempre na primeira ação ui.*,
      mesmo sem um ui.control antes (nada de controle invisível);
    - um elemento só conta como visível se nenhum ancestral estiver transparente
-     ou invisível (menus fechados e a janela de configurações fechada somem).
+     ou invisível (menus fechados e a janela de configurações fechada somem);
+   - erros not_found e ambiguous trazem sugestões com os nomes mais parecidos
+     da tela e a dica de cfg.hint; cfg.onAction recebe cada operação (registro).
    ========================================================= */
 (function (root) {
   const norm = (s) => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
@@ -1509,12 +1571,41 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
       "ui.wait": "Espera um texto aparecer ou o agente terminar. payload: { text? , idle?, timeout? }"
     };
     // Toda ação ui.* acende o aviso com o botão Parar: o controle nunca fica invisível.
+    const words = (s) => norm(s).split(" ").filter((w) => w.length > 2);
+    function suggest(wanted) {
+      const want = words(wanted);
+      if (!want.length) return [];
+      return collect()
+        .filter((i) => i.name && i.role !== "heading")
+        .map((i) => {
+          const n = norm(i.name);
+          const score = want.reduce((a, w) => a + (n.includes(w) ? 2 : n.split(" ").some((x) => x.startsWith(w.slice(0, 4))) ? 1 : 0), 0);
+          return { name: i.name, score };
+        })
+        .filter((x) => x.score > 0)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 3)
+        .map((x) => x.name);
+    }
     const announced = (name, fn) => async (p, ctx) => {
+      p = p || {};
       if (name !== "ui.control" && !control.on && !control.stopped) {
         control = { on: true, by: ctx.from, stopped: false };
         showUI(ctx.from);
       }
-      return fn(p || {}, ctx);
+      try {
+        const out = await fn(p, ctx);
+        try { cfg.onAction && cfg.onAction({ action: name, payload: p, from: ctx.from, ok: true, result: out }); } catch (e) { /* registro opcional */ }
+        return out;
+      } catch (e) {
+        if ((e.code === "not_found" || e.code === "ambiguous") && p.name) {
+          const s = suggest(p.name);
+          if (s.length) e.message += ` Talvez: ${s.map((x) => `"${x}"`).join(", ")}.`;
+        }
+        if (e.code === "not_found" && cfg.hint) e.message += ` ${cfg.hint}`;
+        try { cfg.onAction && cfg.onAction({ action: name, payload: p, from: ctx.from, ok: false, error: { code: e.code, message: e.message } }); } catch (x) { /* registro opcional */ }
+        throw e;
+      }
     };
     for (const name of Object.keys(actions)) link.handle(name, announced(name, actions[name]), desc[name]);
     return { collect, find };
@@ -2628,8 +2719,474 @@ function createTradeLab({ root, toast, askChat, research, store }) {
       return { on: true, strategy: auto.strategy, mode: auto.mode, symbol: market.symbol, source: market.source };
     },
     stop: stopAuto,
+    /** Compra ou vende na conta fictícia, ao preço atual. */
+    async trade(side, { symbol, who = "Miquéias", reason = "Ordem direta." } = {}) {
+      if (!loaded) await this.open("sim");
+      if (symbol && !sym(symbol)) throw Object.assign(new Error(`Ativo desconhecido: ${symbol}.`), { code: "bad_request" });
+      if (symbol && symbol !== market.symbol && !auto.on) { market.symbol = symbol; q("#tl-symbol").value = symbol; await load(); }
+      if (!auto.on) cursor = market.candles.length - 1;
+      const ok = side === "buy" ? buy(reason, who) : sell(reason, who);
+      renderAccount(); drawChart();
+      if (!ok) throw Object.assign(new Error(side === "buy" ? "Não deu para comprar: já existe posição aberta ou falta saldo fictício." : "Não há posição aberta neste ativo para vender."), { code: "rejected" });
+      return { side, symbol: market.symbol, price: price(), equity: +equity().toFixed(2) };
+    },
     sites: SITES,
     redraw: drawChart,
+  };
+}
+
+// Cérebro do Miquéias: entende ordens em português, executa no próprio site,
+// guarda memória sobre o usuário e descreve o próprio estado.
+// Usado pelo chat (modo demo e ferramentas do Claude), pelo Horácio (agent.do / agent.manual)
+// e pelo painel Núcleo. Tudo fica dentro de createBrain para não colidir no arquivo único.
+function createBrain(d) {
+  // d: { store, lab, openChat, showView, openSettings, getView, research, tellAgent, roster, isLoggedIn, userName }
+  const plain = (s) => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+  const clean = (s) => plain(s)
+    .replace(/^@?miqueias[\s,:!-]*/, "")
+    .replace(/^(por favor|pfv|pf)[\s,]*/, "")
+    .replace(/[\s,]*(por favor|pfv)[.!?]*$/, "")
+    .replace(/[.!?]+$/, "")
+    .trim();
+  const fail = (code, message) => Object.assign(new Error(message), { code });
+
+  /* =========================================================
+     Memória de longo prazo (fica no navegador)
+     ========================================================= */
+  const MEM = "miq.memory";
+  const memory = {
+    list: () => d.store.get(MEM, []),
+    add(fact) {
+      const f = String(fact).trim().replace(/[.]+$/, "");
+      if (!f) throw fail("bad_request", "Não entendi o que lembrar.");
+      const all = memory.list().filter((m) => plain(m.text) !== plain(f));
+      all.unshift({ text: f, t: Date.now() });
+      d.store.set(MEM, all.slice(0, 60));
+      return f;
+    },
+    remove(q) {
+      const k = plain(q);
+      const all = memory.list();
+      const keep = all.filter((m) => !plain(m.text).includes(k));
+      d.store.set(MEM, keep);
+      return all.length - keep.length;
+    },
+  };
+
+  /* =========================================================
+     Intenções (o que o Miquéias sabe fazer no próprio site)
+     ========================================================= */
+  const SYM = (t) => (/\b(eth|ethereum)\b/.test(t) ? "ETHUSDT" : /\b(sol|solana)\b/.test(t) ? "SOLUSDT" : /\b(btc|bitcoin)\b/.test(t) ? "BTCUSDT" : undefined);
+  const STRAT = (t) => (/\brsi\b/.test(t) ? "rsi" : /(rompimento|donchian|canal)/.test(t) ? "rompimento" : /(cruzamento|media|ema)/.test(t) ? "cruzamento" : undefined);
+  const MODE = (t) => (/(ao vivo|tempo real|live)/.test(t) ? "live" : /(treino|acelerad|replay|historico)/.test(t) ? "replay" : undefined);
+
+  const INTENTS = [
+    { id: "ajuda", desc: "Lista o que o Miquéias sabe fazer", example: "o que você sabe fazer?",
+      re: /^(ajuda|comandos|o que (voce )?(sabe|consegue|pode) fazer|quais (sao )?(suas )?habilidades)/ },
+    { id: "nova_conversa", desc: "Abre uma conversa nova", example: "abra uma nova conversa",
+      re: /^((abr[aei]r?|comec[ae]r?|inici[ae]r?|cri[ae]r?)\s+(uma\s+)?(nova\s+conversa|conversa\s+nova)|nova conversa)/ },
+    { id: "abrir_laboratorio", desc: "Abre o Laboratório de Trade (aba opcional: estudos ou simuladores)", example: "abra o laboratório de trade na aba estudos",
+      re: /^(abr[aei]r?|mostr[ae]r?|v[aá]i?\s+(para|pro)|entr[ae]r?\s+no)\s+(o\s+)?(laboratorio|lab\b|trade|simulador)/,
+      args: (t) => ({ tab: /estud/.test(t) ? "study" : /(simuladores|sites)/.test(t) ? "sites" : undefined }) },
+    { id: "abrir_nucleo", desc: "Abre o Núcleo (conversa com o Horácio)", example: "abra o núcleo",
+      re: /^(abr[aei]r?|mostr[ae]r?|v[aá]i?\s+(para|pro))\s+(o\s+)?nucleo/ },
+    { id: "abrir_chat", desc: "Volta para o chat", example: "volte para o chat",
+      re: /^(volt[ae]r?|v[aá]i?)\s+(para|pro)\s+(o\s+)?chat/ },
+    { id: "abrir_configuracoes", desc: "Abre a janela de configurações", example: "abra as configurações",
+      re: /^(abr[aei]r?|mostr[ae]r?)\s+(as\s+)?configurac/ },
+    { id: "status_trade", desc: "Resume a conta fictícia, a posição, o piloto e o último estudo", example: "como está o trade?",
+      re: /(como (esta|vai|anda)|status|situacao|resumo|saldo|patrimonio).*(trade|conta|carteira|laboratorio|piloto|posicao)|^(trade|\/trade)$/ },
+    { id: "estudar_trade", desc: "Testa as 3 estratégias em BTC, ETH e SOL e escolhe a melhor", example: "faça um estudo de trade",
+      re: /^(estud[ae]r?|fac[ae]\s+(um\s+)?estudo|test[ae]r?\s+(as\s+)?estrategias|rod[ae]r?\s+(um\s+)?backtest)/ },
+    { id: "piloto_ligar", desc: "Liga o piloto automático (dinheiro fictício). Aceita ativo, estratégia e modo", example: "ligue o piloto em ETH com RSI ao vivo", protected: "Ligar o piloto automático de trade",
+      re: /^(ligu?[ae]r?|ativ[ae]r?|inici[ae]r?|colo(?:c|qu)[ae]r?)\s+(o\s+)?piloto/, args: (t) => ({ symbol: SYM(t), strategy: STRAT(t), mode: MODE(t) }) },
+    { id: "piloto_desligar", desc: "Desliga o piloto automático", example: "desligue o piloto",
+      re: /^(desligu?[ae]r?|par[ae]r?|desativ[ae]r?)\s+(o\s+)?piloto/ },
+    { id: "comprar", desc: "Compra na conta fictícia ao preço atual", example: "compre ETH",
+      re: /^(compr[ae]r?)\b/, args: (t) => ({ symbol: SYM(t) }) },
+    { id: "vender", desc: "Vende a posição aberta na conta fictícia", example: "venda tudo",
+      re: /^(vend[ae]r?)\b/, args: (t) => ({ symbol: SYM(t) }) },
+    { id: "pesquisar", desc: "Pesquisa na web e cita as fontes", example: "pesquise sobre simuladores de trade",
+      re: /^(\/pesquisar?|pesquis[ae]r?|busqu?[ae]r?|procur[ae]r?)\s+(na (web|internet)\s+)?(sobre\s+|por\s+)?(.+)/, args: (t, m, raw) => ({ query: tail(raw, m[5]) }) },
+    { id: "lembrar", desc: "Guarda um fato sobre o usuário na memória", example: "lembre que eu prefiro respostas curtas",
+      re: /^(lembr[ae](-se)?|memoriz[ae]|guard[ae]|anot[ae])\s+(que\s+|isso:?\s*)?(.+)/, args: (t, m, raw) => ({ fact: tail(raw, m[4]) }) },
+    { id: "esquecer", desc: "Apaga um fato da memória", example: "esqueça que eu prefiro respostas curtas",
+      re: /^esquec[ae]r?\s+(que\s+|o que\s+)?(.+)/, args: (t, m) => ({ fact: m[2] }) },
+    { id: "memoria", desc: "Mostra o que o Miquéias lembra sobre o usuário", example: "o que você lembra sobre mim?",
+      re: /(o que (voce )?(lembra|sabe) (de|sobre) mim|sua memoria|mostr[ae] (a )?memoria)/ },
+    { id: "avisar_horacio", desc: "Manda uma mensagem ao Horácio pelo Asafe", example: "diga ao Horácio que o estudo terminou",
+      re: /^(dig[ae]|fal[ae]|mand[ae]|avis[ae]|envi[ae]|pergunt[ae])\s+(ao|pro|para o|pra o)\s+horacio[\s,:]*(que\s+)?(.+)/, args: (t, m, raw) => ({ text: tail(raw, m[4]) }) },
+    { id: "agentes", desc: "Mostra quem está conectado ao Asafe", example: "quem está conectado?",
+      re: /(quem esta (conectado|online)|agentes (conectados|online)|^\/agentes$)/ },
+  ];
+
+  // Recupera o trecho original (com acentos e maiúsculas) a partir do trecho normalizado
+  function tail(raw, part) {
+    const p = plain(raw);
+    const i = p.lastIndexOf(part);
+    return i >= 0 ? raw.slice(raw.length - (p.length - i)).trim() : part;
+  }
+
+  function parseOne(raw) {
+    const t = clean(raw);
+    if (!t) return null;
+    const rawClean = raw.trim().replace(/^@?miqu[eé]ias[\s,:!-]*/i, "").replace(/^por favor[\s,]*/i, "").replace(/[.!?]+$/, "");
+    for (const it of INTENTS) {
+      const m = t.match(it.re);
+      if (m) return { id: it.id, args: it.args ? it.args(t, m, rawClean) : {}, text: raw.trim() };
+    }
+    return null;
+  }
+
+  // Vários passos: "abra o laboratório e depois ligue o piloto em ETH; diga ao Horácio que liguei"
+  function parse(raw) {
+    const parts = String(raw).split(/\s*(?:;|,?\s+e depois\s+|,?\s+e ent[aã]o\s+)\s*/i).filter((x) => x.trim());
+    const steps = parts.map(parseOne);
+    return steps.length && steps.every(Boolean) ? steps : [];
+  }
+
+  /* =========================================================
+     Execução
+     ========================================================= */
+  const money = (v) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "USD" }).format(v);
+  const STRAT_NAME = { cruzamento: "cruzamento de médias", rsi: "RSI", rompimento: "rompimento de canal" };
+
+  async function exec(step, { remote = false, confirm = false, who = "Miquéias" } = {}) {
+    const it = INTENTS.find((i) => i.id === step.id);
+    if (!it) throw fail("not_understood", "Não reconheci esse passo.");
+    if (remote && it.protected && !confirm) throw fail("needs_confirmation", `${it.protected}: confirma esta ação?`);
+    const a = step.args || {};
+    const needLogin = !["ajuda", "memoria", "agentes", "status_trade"].includes(it.id);
+    if (needLogin && !d.isLoggedIn()) throw fail("not_ready", "O Miquéias está na tela de entrada. Entre no Miquéias e tente de novo.");
+
+    switch (it.id) {
+      case "ajuda":
+        return { detail: "Listei o que sei fazer.", text: helpText() };
+      case "nova_conversa":
+        d.openChat(null);
+        return { detail: "Abri uma conversa nova." };
+      case "abrir_laboratorio":
+        d.showView("lab");
+        if (a.tab) await d.lab.open(a.tab);
+        return { detail: `Abri o Laboratório de Trade${a.tab === "study" ? " na aba Estudos" : a.tab === "sites" ? " na aba Simuladores na web" : ""}.` };
+      case "abrir_nucleo":
+        d.showView("nucleo");
+        return { detail: "Abri o Núcleo." };
+      case "abrir_chat":
+        d.showView("chat");
+        return { detail: "Voltei para o chat." };
+      case "abrir_configuracoes":
+        d.openSettings();
+        return { detail: "Abri as configurações." };
+      case "status_trade": {
+        const s = d.lab.status();
+        const pos = s.position ? `posição aberta em ${s.position.symbol.replace("USDT", "")} comprada a ${s.position.entry.toLocaleString("pt-BR")}` : "sem posição aberta";
+        const auto = s.autopilot.on ? `piloto ligado (${STRAT_NAME[s.autopilot.strategy]}, ${s.autopilot.symbol.replace("USDT", "")}, ${s.autopilot.mode === "live" ? "ao vivo" : "treino acelerado"})` : "piloto desligado";
+        const best = s.lastStudy ? ` Melhor estratégia no último estudo: ${s.lastStudy.ranking[0].strategy} (${s.lastStudy.ranking[0].avgReturnPct >= 0 ? "+" : ""}${s.lastStudy.ranking[0].avgReturnPct}% em média).` : " Ainda não fiz nenhum estudo.";
+        return {
+          detail: "Li a conta fictícia.", data: s,
+          text: `Conta fictícia: **${money(s.equity)}** (${s.returnPct >= 0 ? "+" : ""}${s.returnPct}% desde o início), ${pos}, ${s.trades} operações fechadas, ${auto}.${best}`,
+        };
+      }
+      case "estudar_trade": {
+        const r = await d.lab.study();
+        return {
+          detail: "Fiz o estudo de trade.", data: r,
+          text: `Estudo concluído${r.source === "sintetico" ? " (mercado sintético, sem conexão com a Binance)" : " com dados reais da Binance"}.\n\n${r.ranking.map((x, i) => `${i + 1}. **${x.strategy}**: ${x.avgReturnPct >= 0 ? "+" : ""}${x.avgReturnPct}% em média`).join("\n")}\n\n${r.insights.map((x) => `- ${x}`).join("\n")}`,
+        };
+      }
+      case "piloto_ligar": {
+        d.showView("lab");
+        const r = await d.lab.autopilot({ on: true, ...a });
+        return { detail: `Liguei o piloto: ${STRAT_NAME[r.strategy]} em ${r.symbol.replace("USDT", "")}, ${r.mode === "live" ? "ao vivo" : "treino acelerado"}.`, data: r };
+      }
+      case "piloto_desligar":
+        await d.lab.autopilot({ on: false });
+        return { detail: "Desliguei o piloto automático." };
+      case "comprar":
+      case "vender": {
+        d.showView("lab");
+        const r = await d.lab.trade(it.id === "comprar" ? "buy" : "sell", { symbol: a.symbol, who, reason: `Pedido de ${who}.` });
+        return { detail: `${it.id === "comprar" ? "Comprei" : "Vendi"} ${r.symbol.replace("USDT", "")} a ${r.price.toLocaleString("pt-BR")} (dinheiro fictício).`, data: r };
+      }
+      case "pesquisar": {
+        if (!remote) return { detail: "Pesquisa", search: a.query };
+        const am = await d.research(a.query);
+        return { detail: "Pesquisei na web.", data: { reply: am?.content, sources: am?.sources || [] }, text: am?.content };
+      }
+      case "lembrar": {
+        const f = memory.add(a.fact);
+        return { detail: "Guardei na memória.", text: `Anotado na minha memória: "${f}". Vou levar isso em conta nas próximas conversas.` };
+      }
+      case "esquecer": {
+        const n = memory.remove(a.fact);
+        return { detail: n ? "Apaguei da memória." : "Nada encontrado na memória.", text: n ? `Pronto, esqueci ${n === 1 ? "isso" : `${n} lembranças sobre isso`}.` : "Não achei nada parecido na minha memória." };
+      }
+      case "memoria": {
+        const all = memory.list();
+        return { detail: "Li a memória.", text: all.length ? `Isto é o que eu lembro sobre você:\n\n${all.map((m) => `- ${m.text}`).join("\n")}` : "Ainda não guardei nada sobre você. Diga, por exemplo, \"lembre que eu prefiro respostas curtas\"." };
+      }
+      case "avisar_horacio": {
+        const r = await d.tellAgent("horacio", a.text);
+        return { detail: "Mandei a mensagem ao Horácio.", data: r, text: r?.reply ? `O Horácio respondeu: ${r.reply}` : "Mensagem entregue ao Horácio." };
+      }
+      case "agentes": {
+        const list = await d.roster();
+        return { detail: "Consultei o Asafe.", data: list, text: list.length ? list.map((a2) => `- **${a2.name}**: ${a2.online ? "online" : "offline"}`).join("\n") : "Não consegui falar com o Asafe agora." };
+      }
+    }
+    throw fail("not_understood", "Não sei executar esse passo.");
+  }
+
+  /** Executa um objetivo em português, passo a passo. Usado pelo Horácio (agent.do). */
+  async function run(goal, opts = {}) {
+    const steps = parse(goal);
+    if (!steps.length) {
+      throw fail("not_understood", `Não entendi "${String(goal).slice(0, 80)}". Exemplos que funcionam: ${INTENTS.slice(1, 9).map((i) => `"${i.example}"`).join(", ")}. Para perguntas livres use chat.ask.`);
+    }
+    const log = [];
+    let last = null;
+    for (const s of steps) {
+      try {
+        last = await exec(s, opts);
+        log.push({ step: s.id, ok: true, detail: last.detail });
+      } catch (e) {
+        log.push({ step: s.id, ok: false, code: e.code || "error", detail: e.message });
+        const err = fail(e.code || "error", `${e.message} (passo ${log.length} de ${steps.length}: ${s.id})`);
+        err.steps = log;
+        throw err;
+      }
+    }
+    return { done: true, intent: steps.map((s) => s.id).join(" + "), steps: log, result: last?.text || last?.detail, data: last?.data };
+  }
+
+  /* =========================================================
+     Contexto, manual e ajuda
+     ========================================================= */
+  function context() {
+    const s = d.lab.status();
+    const mem = memory.list();
+    const lines = [
+      `Tela atual do site: ${d.getView()}.`,
+      `Laboratório de Trade (dinheiro fictício): patrimônio ${money(s.equity)} (${s.returnPct}%), ${s.position ? `posição em ${s.position.symbol}` : "sem posição"}, piloto ${s.autopilot.on ? `ligado (${s.autopilot.strategy}, ${s.autopilot.symbol})` : "desligado"}${s.lastStudy ? `, melhor estratégia no último estudo: ${s.lastStudy.ranking[0].strategy}` : ""}.`,
+      `Usuário: ${d.userName() || "não identificado"}.`,
+    ];
+    if (mem.length) lines.push(`Memória sobre o usuário (use quando for útil, sem repetir à toa):\n${mem.map((m) => `- ${m.text}`).join("\n")}`);
+    lines.push("Você faz parte da Nathanael Industries e se conecta ao Asafe, o centro dos agentes. O Horácio é outro agente que pode pedir coisas a você e operar sua tela. Use as ferramentas para agir no próprio site quando o usuário pedir uma ação.");
+    return lines.join("\n");
+  }
+
+  function manual() {
+    return {
+      app: "Miquéias",
+      tips: [
+        "Prefira agent.do { goal } a cliques: o Miquéias conhece a própria tela e executa sem adivinhar nomes.",
+        "Vários passos podem ir num goal só, separados por ';' ou 'e depois'.",
+        "Ações protegidas (ligar o piloto, sair, apagar conversas, chave da API, zerar conta) voltam needs_confirmation; reenvie com confirm: true só depois que o Sr. Nathanael confirmar.",
+        "Se usar ui.click, use os nomes deste manual. Depois de abrir um menu, espere ~300 ms antes do próximo clique.",
+        "Para perguntas livres use chat.ask; para pesquisa na web, research.run.",
+      ],
+      screens: [
+        { id: "login", desc: "Tela de entrada (abas Entrar / Criar conta)", elements: [{ name: "E-mail", role: "input" }, { name: "Senha", role: "input", protected: true }, { name: "Entrar", role: "button" }, { name: "Continuar como convidado", role: "button" }] },
+        { id: "chat", desc: "Conversa principal", elements: [
+          { name: "Nova conversa", role: "button" }, { name: "Buscar conversas", role: "input" }, { name: "Pesquisa", role: "button" },
+          { name: "Laboratório de Trade", role: "button" }, { name: "Núcleo", role: "button" }, { name: "Mensagem", role: "textarea" },
+          { name: "Pesquisa na web", role: "toggle" }, { name: "Raciocínio profundo", role: "toggle" }, { name: "Enviar", role: "button" },
+          { name: "Modelo", role: "button" }, { name: "Conta", role: "button" }, { name: "Apagar conversa", role: "button", protected: true }] },
+        { id: "menu da conta", desc: "Abre ao clicar em Conta", elements: [{ name: "Configurações", role: "menuitem" }, { name: "Limpar histórico", role: "menuitem", protected: true }, { name: "Sair", role: "menuitem", protected: true }] },
+        { id: "laboratório de trade", desc: "Simulador com dinheiro fictício", elements: [
+          { name: "Simulador", role: "tab" }, { name: "Estudos", role: "tab" }, { name: "Simuladores na web", role: "tab" },
+          { name: "Comprar", role: "button" }, { name: "Vender", role: "button" }, { name: "Miquéias, opere", role: "button", protected: true },
+          { name: "Zerar conta fictícia", role: "button", protected: true }, { name: "Miquéias, estude agora", role: "button" }] },
+        { id: "núcleo", desc: "Conversa entre o Miquéias e o Horácio, e registro das operações", elements: [{ name: "Mensagem para o Horácio", role: "input" }, { name: "Enviar ao Horácio", role: "button" }] },
+        { id: "configurações", desc: "Janela de configurações", elements: [{ name: "Seu nome", role: "input" }, { name: "Chave da API Anthropic (opcional)", role: "input", protected: true }, { name: "Salvar", role: "button", protected: true }, { name: "Cancelar", role: "button" }] },
+      ],
+      intents: INTENTS.map((i) => ({ id: i.id, desc: i.desc, example: i.example, protected: !!i.protected })),
+    };
+  }
+
+  function helpText() {
+    return `Eu sei agir aqui no meu site. Experimente:\n\n${INTENTS.filter((i) => i.id !== "ajuda").map((i) => `- **${i.desc}**: "${i.example}"`).join("\n")}\n\nVocê também pode juntar passos: "abra o laboratório e depois ligue o piloto em ETH com RSI".`;
+  }
+
+  /* =========================================================
+     Ferramentas para o Claude (modo com chave da API)
+     ========================================================= */
+  const tools = [
+    {
+      name: "executar_no_site",
+      description: "Executa ações no próprio site do Miquéias a partir de uma ordem em português. Use quando o usuário pedir para abrir telas, consultar ou operar o Laboratório de Trade (dinheiro fictício), lembrar/esquecer fatos, mandar mensagem ao Horácio ou ver os agentes conectados. Ordens aceitas, com exemplos: " +
+        INTENTS.filter((i) => !["ajuda", "pesquisar"].includes(i.id)).map((i) => `${i.example}`).join(" | ") +
+        ". Vários passos podem ser separados por ';'. Não use para pesquisar na web nem para responder perguntas.",
+      input_schema: { type: "object", properties: { ordem: { type: "string", description: "Ordem em português, por exemplo: 'ligue o piloto em ETH com RSI'" } }, required: ["ordem"], additionalProperties: false },
+      strict: true,
+      eager_input_streaming: true,
+    },
+  ];
+
+  async function runTool(name, input) {
+    if (name !== "executar_no_site") throw fail("unknown_tool", `Ferramenta desconhecida: ${name}`);
+    if (!input || typeof input.ordem !== "string" || !input.ordem.trim()) throw fail("bad_request", "Campo 'ordem' ausente ou vazio.");
+    const r = await run(input.ordem, { remote: false });
+    return r;
+  }
+
+  return { parse, parseOne, exec, run, context, manual, helpText, memory, tools, runTool, intents: INTENTS };
+}
+
+// Núcleo do Miquéias: conversa com o Horácio pelo Asafe e registro de tudo o que ele faz aqui.
+function createNucleo({ root, toast, store, brain, getLink, tellAgent, roster }) {
+  const KEY = "miq.nucleo";
+  let feed = store.get(KEY, []);
+  let agents = [];
+  let timer = null;
+  let stats = { ok: 0, err: 0 };
+  const save = () => store.set(KEY, feed.slice(-150));
+  const q = (s) => root.querySelector(s);
+  const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const hm = (t) => new Date(t).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  const NAMES = { horacio: "Horácio", asafe: "Asafe", miqueias: "Miquéias" };
+  const nameOf = (id) => NAMES[id] || id;
+
+  const ICON_SEND = '<svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+
+  root.innerHTML = `
+    <div class="nc-wrap">
+      <header class="tl-head">
+        <div>
+          <h2>Núcleo</h2>
+          <p>Aqui o Miquéias conversa com o <b>Horácio</b> pelo Asafe e registra cada coisa que ele pede ou faz na tela.</p>
+        </div>
+      </header>
+
+      <div class="nc-status">
+        <div class="nc-stat glass"><small>Asafe</small><b id="nc-asafe">—</b><span id="nc-asafe-mode"></span></div>
+        <div class="nc-stat glass"><small>Horácio</small><b id="nc-horacio">—</b><span id="nc-horacio-cap"></span></div>
+        <div class="nc-stat glass"><small>Operações nesta sessão</small><b id="nc-ops">0</b><span id="nc-errs"></span></div>
+      </div>
+
+      <div class="tl-grid nc-grid">
+        <div class="tl-card glass nc-chat">
+          <div class="tl-auto-head"><b>Conversa com o Horácio</b><small>Mensagens e operações, em ordem</small></div>
+          <ol class="nc-feed" id="nc-feed"></ol>
+          <form class="nc-compose" id="nc-form">
+            <input id="nc-input" type="text" autocomplete="off" placeholder="Mensagem para o Horácio…" aria-label="Mensagem para o Horácio" data-asafe-name="Mensagem para o Horácio" />
+            <button class="send" id="nc-send" type="submit" aria-label="Enviar ao Horácio" data-asafe-name="Enviar ao Horácio">${ICON_SEND}</button>
+          </form>
+          <div class="nc-quick">
+            <button class="chip-toggle" type="button" data-q="manual">Enviar o manual de operação</button>
+            <button class="chip-toggle" type="button" data-q="ping">Testar conexão</button>
+            <button class="chip-toggle" type="button" data-q="clear">Limpar registro</button>
+          </div>
+        </div>
+
+        <div class="tl-card glass nc-guide">
+          <div class="tl-auto-head"><b>Como o Horácio deve me operar</b></div>
+          <ul class="nc-tips" id="nc-tips"></ul>
+          <div class="tl-auto-head"><b>Ordens que eu executo sozinho</b><small>agent.do { goal }</small></div>
+          <ul class="nc-intents" id="nc-intents"></ul>
+        </div>
+      </div>
+    </div>`;
+
+  /* ---------- registro ---------- */
+  function add(entry) {
+    feed.push({ t: Date.now(), ...entry });
+    if (entry.kind === "op") entry.ok ? stats.ok++ : stats.err++;
+    save();
+    renderFeed(true);
+    renderStats();
+  }
+
+  function renderFeed(animateLast = false) {
+    const ol = q("#nc-feed");
+    if (!feed.length) {
+      ol.innerHTML = '<li class="nc-empty">Nada ainda. Quando o Horácio pedir algo ou operar a tela, aparece aqui. Você também pode escrever para ele abaixo.</li>';
+      return;
+    }
+    ol.innerHTML = feed.slice(-80).map((e, i, arr) => {
+      const anim = animateLast && i === arr.length - 1 ? " fresh" : "";
+      if (e.kind === "op") {
+        return `<li class="nc-op ${e.ok ? "ok" : "err"}${anim}"><time>${hm(e.t)}</time><span class="nc-act">${esc(e.action)}</span><span>${esc(e.text)}</span></li>`;
+      }
+      if (e.kind === "sys") return `<li class="nc-sys${anim}"><time>${hm(e.t)}</time><span>${esc(e.text)}</span></li>`;
+      const mine = e.kind === "out";
+      return `<li class="nc-msg ${mine ? "out" : "in"}${anim}"><div class="nc-bubble"><b>${esc(mine ? "Miquéias" : nameOf(e.who))}</b><p>${esc(e.text)}</p><time>${hm(e.t)}</time></div></li>`;
+    }).join("");
+    ol.scrollTop = ol.scrollHeight;
+  }
+
+  function renderStats() {
+    q("#nc-ops").textContent = stats.ok + stats.err;
+    q("#nc-errs").textContent = stats.err ? `${stats.err} recusadas ou com erro` : "nenhum erro";
+  }
+
+  async function refresh() {
+    const link = getLink();
+    const st = link?.status || "desconectado";
+    const label = { online: "Conectado", waiting: "Aguardando o Asafe", connecting: "Conectando…", offline: "Desligado" }[st] || "Desconectado";
+    q("#nc-asafe").textContent = label;
+    q("#nc-asafe").className = st === "online" ? "on" : "off";
+    q("#nc-asafe-mode").textContent = link?.mode === "server" ? "modo servidor" : link?.mode === "local" ? "modo navegador" : "";
+    agents = st === "online" ? await roster() : [];
+    const h = agents.find((a) => a.id === "horacio");
+    q("#nc-horacio").textContent = !h ? "Não encontrado" : h.online ? "Online" : "Offline";
+    q("#nc-horacio").className = h?.online ? "on" : "off";
+    const acts = (h?.actions || []).map((a) => a.name || a);
+    q("#nc-horacio-cap").textContent = !h ? "abra o Horácio e o Asafe" : acts.includes("chat.say") ? "conversa com resposta" : acts.includes("notify") ? "recebe avisos (sem resposta)" : "";
+  }
+
+  function renderGuide() {
+    const m = brain.manual();
+    q("#nc-tips").innerHTML = m.tips.map((t) => `<li>${esc(t)}</li>`).join("");
+    q("#nc-intents").innerHTML = m.intents.filter((i) => i.id !== "ajuda").map((i) => `<li><span>${esc(i.desc)}${i.protected ? ' <em>pede confirmação</em>' : ""}</span><code>${esc(i.example)}</code></li>`).join("");
+  }
+
+  /* ---------- envio ao Horácio ---------- */
+  async function send(text) {
+    text = String(text || "").trim();
+    if (!text) return;
+    add({ kind: "out", text });
+    try {
+      const r = await tellAgent("horacio", text);
+      if (r?.reply) add({ kind: "in", who: "horacio", text: r.reply });
+      else add({ kind: "sys", text: "Entregue ao Horácio. Ele ainda não tem a ação de conversa (chat.say), então não respondeu." });
+    } catch (e) {
+      add({ kind: "sys", text: `Não entreguei: ${e.message}` });
+    }
+  }
+
+  q("#nc-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const i = q("#nc-input");
+    send(i.value);
+    i.value = "";
+  });
+  root.addEventListener("click", async (e) => {
+    const b = e.target.closest("[data-q]");
+    if (!b) return;
+    if (b.dataset.q === "clear") { feed = []; save(); renderFeed(); return; }
+    if (b.dataset.q === "ping") {
+      const link = getLink();
+      if (!link) return add({ kind: "sys", text: "O Asafe não está conectado." });
+      try { const r = await link.request("horacio", "ping", {}, { timeout: 6000 }); add({ kind: "sys", text: `Horácio respondeu ao ping: ${r?.ready ? "pronto" : JSON.stringify(r)}.` }); }
+      catch (err) { add({ kind: "sys", text: `Sem resposta do Horácio: ${err.message}` }); }
+      refresh();
+    }
+    if (b.dataset.q === "manual") {
+      const m = brain.manual();
+      send(`Manual do Miquéias para operar sem erros:\n${m.tips.map((t) => `• ${t}`).join("\n")}\nOrdens que executo com agent.do: ${m.intents.filter((i) => i.id !== "ajuda").map((i) => `"${i.example}"`).join("; ")}.`);
+    }
+  });
+
+  renderFeed();
+  renderGuide();
+  renderStats();
+
+  return {
+    open() { refresh(); renderFeed(); clearInterval(timer); timer = setInterval(() => { if (!root.classList.contains("hidden")) refresh(); }, 15000); },
+    log: add,
+    refresh,
   };
 }
 
@@ -2671,13 +3228,16 @@ const webSearchTool = (model) => ({
  * @param {(t:string)=>void} o.onThinking
  * @param {(q:string)=>void} o.onSearch    consulta que o modelo está pesquisando
  * @param {(s:{title:string,url:string}[])=>void} o.onSources  fontes encontradas
+ * @param {object[]} o.tools  ferramentas do próprio site (executadas no navegador)
+ * @param {(name:string, input:object)=>Promise<any>} o.onToolUse  executa uma ferramenta e devolve o resultado
  */
-async function streamClaude({ apiKey, model, system, messages, deep, search, signal, onText, onThinking, onSearch, onSources }) {
+async function streamClaude({ apiKey, model, system, messages, deep, search, signal, onText, onThinking, onSearch, onSources, tools: siteTools = [], onToolUse }) {
   const client = await getClient(apiKey);
   const convo = [...messages];
   let final;
-  // A busca no servidor pode pausar o turno (pause_turn); nesse caso continuamos de onde parou.
-  for (let round = 0; round < 4; round++) {
+  // A busca no servidor pode pausar o turno (pause_turn) e as ferramentas do site pedem
+  // uma volta a mais (tool_use); nos dois casos continuamos de onde parou.
+  for (let round = 0; round < 10; round++) {
     const params = {
       model,
       max_tokens: 64000,
@@ -2686,7 +3246,8 @@ async function streamClaude({ apiKey, model, system, messages, deep, search, sig
       thinking: { type: "adaptive", display: deep ? "summarized" : "omitted" },
       output_config: { effort: deep || search ? "high" : "low" },
     };
-    if (search) params.tools = [webSearchTool(model)];
+    const tools = [...(search ? [webSearchTool(model)] : []), ...siteTools];
+    if (tools.length) params.tools = tools;
     if (FALLBACK_MODELS.has(model)) {
       params.betas = ["server-side-fallback-2026-07-01"];
       params.fallbacks = "default";
@@ -2714,8 +3275,21 @@ async function streamClaude({ apiKey, model, system, messages, deep, search, sig
       const why = final.stop_details?.explanation;
       throw new Error("O modelo recusou este pedido." + (why ? ` (${why})` : ""));
     }
-    if (final.stop_reason !== "pause_turn") break;
+    if (final.stop_reason === "pause_turn") { convo.push({ role: "assistant", content: final.content }); continue; }
+    if (final.stop_reason !== "tool_use" || !onToolUse) break;
+
+    // Executa todas as ferramentas pedidas e devolve os resultados numa única mensagem
     convo.push({ role: "assistant", content: final.content });
+    const results = [];
+    for (const b of final.content.filter((c) => c.type === "tool_use")) {
+      try {
+        const out = await onToolUse(b.name, b.input);
+        results.push({ type: "tool_result", tool_use_id: b.id, content: JSON.stringify(out ?? {}).slice(0, 8000) });
+      } catch (e) {
+        results.push({ type: "tool_result", tool_use_id: b.id, is_error: true, content: `${e.code ? `[${e.code}] ` : ""}${e.message || e}` });
+      }
+    }
+    convo.push({ role: "user", content: results });
   }
   return final;
 }
@@ -3096,6 +3670,7 @@ function aiShell(animate) {
       <div class="name">Miquéias <small></small></div>
       <div class="think-slot"></div>
       <div class="search-slot"></div>
+      <div class="tool-slot"></div>
       <div class="md"></div>
       <div class="sources"></div>
       <div class="actions"></div>
@@ -3119,6 +3694,7 @@ function addAiMsg(m, isLast, animate = true) {
   el.querySelector(".name small").textContent = m.model ? (MODELS.find((x) => x.id === m.model)?.label.split("· ")[1] || "") : "";
   if (m.thinking) renderThinking(el, m.thinking, false);
   if (m.searches?.length) renderSearching(el, m.searches, false);
+  if (m.actions?.length) renderActions(el, m.actions);
   if (m.sources?.length) renderSources(el, m.sources);
   el.querySelector(".md").innerHTML = m.error ? "" : renderMarkdown(m.content);
   if (m.error) showError(el, m.error);
@@ -3142,6 +3718,18 @@ function renderSearching(el, queries, live) {
   slot.innerHTML = `<div class="search-box ${live ? "live" : ""}">${ICON.globe}<span class="${live ? "shimmer" : ""}">${live ? "Pesquisando na web…" : `Pesquisou na web (${queries.length} ${queries.length === 1 ? "busca" : "buscas"})`}</span></div><ul class="search-q"></ul>`;
   const ul = slot.querySelector("ul");
   queries.filter(Boolean).forEach((q) => { const li = document.createElement("li"); li.textContent = q; ul.append(li); });
+}
+
+function renderActions(el, list) {
+  const slot = el.querySelector(".tool-slot");
+  slot.innerHTML = "";
+  list.forEach((a) => {
+    const c = document.createElement("div");
+    c.className = `act-chip ${a.ok ? "ok" : "err"}`;
+    c.innerHTML = a.ok ? '<svg viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg>' : '<svg viewBox="0 0 24 24"><path d="M12 8v5M12 16.5v.5"/><circle cx="12" cy="12" r="9"/></svg>';
+    c.append(a.detail);
+    slot.append(c);
+  });
 }
 
 function renderSources(el, sources) {
@@ -3187,6 +3775,17 @@ async function send(text, { regenerate = false, onText: onTextExt, search } = {}
   let useSearch = search ?? state.search;
   const cmd = text.match(/^\/pesquisa(?:r)?\s+([\s\S]+)/i);
   if (cmd) { useSearch = true; text = cmd[1].trim(); }
+  if (!regenerate && !search && text) {
+    const pre = brain.parse(text);
+    if (pre.length === 1 && pre[0].id === "nova_conversa") {
+      openChat(null);
+      $("#input").value = "";
+      autosize();
+      toast("Conversa nova aberta");
+      return;
+    }
+    if (pre.length === 1 && pre[0].id === "pesquisar") useSearch = true;
+  }
   if (!text && !state.pendingFile && !regenerate) return;
 
   const model = state.settings.model;
@@ -3268,7 +3867,25 @@ async function send(text, { regenerate = false, onText: onTextExt, search } = {}
       }
       const lastUser = [...chat.messages].reverse().find((m) => m.role === "user");
       const prompt = lastUser.content + (lastUser.file ? ` ${lastUser.file.name}` : "");
-      if (useSearch) {
+      const steps = useSearch ? [] : brain.parse(prompt);
+      if (steps.length) {
+        am.actions = [];
+        const outs = [];
+        for (const st of steps) {
+          try {
+            const r = await brain.exec(st, { who: "Você" });
+            am.actions.push({ ok: true, detail: r.detail });
+            if (r.text) outs.push(r.text);
+          } catch (e) {
+            am.actions.push({ ok: false, detail: e.message });
+            outs.push(`Não consegui fazer isso: ${e.message}`);
+            break;
+          } finally {
+            renderActions(el, am.actions);
+          }
+        }
+        await streamDemo(outs.join("\n\n") || `Feito. ${am.actions.map((a) => a.detail).join(" ")}`, { signal: ctrl.signal, onText });
+      } else if (useSearch) {
         await sleep(500);
         const r = demoResearch(prompt);
         am.sources = r.sources;
@@ -3286,10 +3903,24 @@ async function send(text, { regenerate = false, onText: onTextExt, search } = {}
       await streamClaude({
         apiKey: state.settings.apiKey,
         model,
-        system: (state.settings.system || DEFAULT_SYSTEM) + (useSearch ? `\n\nHoje é ${new Date().toLocaleDateString("pt-BR")}. Pesquise na web antes de responder, compare as fontes e cite-as no texto. Diga claramente quando algo não pôde ser confirmado.` : ""),
+        system: (state.settings.system || DEFAULT_SYSTEM) + `\n\n${brain.context()}` + (useSearch ? `\n\nHoje é ${new Date().toLocaleDateString("pt-BR")}. Pesquise na web antes de responder, compare as fontes e cite-as no texto. Diga claramente quando algo não pôde ser confirmado.` : ""),
         messages: history,
         deep: state.deep,
         search: useSearch,
+        tools: brain.tools,
+        onToolUse: async (name, input) => {
+          am.actions = am.actions || [];
+          try {
+            const r = await brain.runTool(name, input);
+            am.actions.push({ ok: true, detail: r.steps.map((x) => x.detail).join(" ") });
+            return r;
+          } catch (e) {
+            am.actions.push({ ok: false, detail: e.message });
+            throw e;
+          } finally {
+            renderActions(el, am.actions);
+          }
+        },
         onSearch: (q) => { am.searches.push(q); renderSearching(el, am.searches, true); },
         onSources: (list) => {
           list.forEach((s) => { if (!am.sources.some((x) => x.url === s.url)) am.sources.push(s); });
@@ -3432,6 +4063,7 @@ function bind() {
       $("#input").focus();
     }
     if (b.dataset.skill === "trade") showView("lab");
+    if (b.dataset.skill === "nucleo") showView("nucleo");
     closeSidebarMobile();
   });
   $("#think-toggle").addEventListener("click", (e) => {
@@ -3614,8 +4246,11 @@ function showView(v) {
   state.view = v;
   $("#app").dataset.view = v;
   $("#lab").classList.toggle("hidden", v !== "lab");
-  $$("#skills [data-skill]").forEach((b) => b.classList.toggle("active", b.dataset.skill === "trade" && v === "lab"));
-  if (v === "lab") { lab.open(); $$(".h-item.active").forEach((x) => x.classList.remove("active")); }
+  $("#nucleo").classList.toggle("hidden", v !== "nucleo");
+  $$("#skills [data-skill]").forEach((b) => b.classList.toggle("active", (b.dataset.skill === "trade" && v === "lab") || (b.dataset.skill === "nucleo" && v === "nucleo") || (b.dataset.skill === "research" && v === "chat" && state.search)));
+  if (v !== "chat") $$(".h-item.active").forEach((x) => x.classList.remove("active"));
+  if (v === "lab") lab.open();
+  if (v === "nucleo") nucleo.open();
 }
 
 function setSearch(on) {
@@ -3707,6 +4342,54 @@ lab = createTradeLab({
   askChat: (t) => { openChat(null); send(t); },
   research: (t) => { openChat(null); send(t, { search: true }); },
 });
+
+/* ---------- conversa com outros agentes pelo Asafe ---------- */
+async function rosterSafe() {
+  const link = window.miqueiasAsafe;
+  if (!link || link.status !== "online") return [];
+  try { return await link.roster(); } catch { return []; }
+}
+async function tellAgent(to, text) {
+  const link = window.miqueiasAsafe;
+  if (!link || link.status !== "online") throw asafeError("offline", "O Miquéias não está conectado ao Asafe. Abra o Asafe no mesmo navegador (ou ligue o servidor).");
+  const ag = (await rosterSafe()).find((a) => a.id === to);
+  const acts = (ag?.actions || []).map((a) => a.name || a);
+  if (acts.includes("chat.say")) {
+    const r = await link.request(to, "chat.say", { text, from: "miqueias" }, { timeout: 90000 });
+    return { reply: r?.reply ?? r?.text ?? null };
+  }
+  await link.request(to, "notify", { text: `Miquéias: ${text}` }, { timeout: 10000 });
+  return { reply: null };
+}
+
+const brain = createBrain({
+  store,
+  lab,
+  openChat,
+  showView,
+  openSettings,
+  getView: () => (!$("#login").classList.contains("hidden") ? "login" : state.view || "chat"),
+  isLoggedIn: () => !$("#app").classList.contains("hidden"),
+  userName: () => state.settings.name || state.user?.name || "",
+  research: async (q) => { openChat(null); return send(q, { search: true }); },
+  tellAgent: async (to, text) => {
+    nucleo.log({ kind: "out", text });
+    const r = await tellAgent(to, text);
+    if (r.reply) nucleo.log({ kind: "in", who: to, text: r.reply });
+    return r;
+  },
+  roster: rosterSafe,
+});
+const nucleo = createNucleo({
+  root: $("#nucleo"),
+  toast,
+  store,
+  brain,
+  getLink: () => window.miqueiasAsafe,
+  tellAgent,
+  roster: rosterSafe,
+});
+
 inlineLogos();
 applyMotion();
 startBackground();
@@ -3735,11 +4418,38 @@ function ensureReady() {
   if (state.busy) throw asafeError("busy", "O Miquéias está respondendo outra mensagem agora.");
 }
 
+const summarize = (p) => {
+  const keys = Object.entries(p || {}).filter(([k, v]) => v !== undefined && k !== "confirm");
+  if (!keys.length) return "sem parâmetros";
+  return keys.map(([k, v]) => `${k}: ${typeof v === "string" ? `"${v.slice(0, 60)}"` : JSON.stringify(v)}`).join(", ") + (p?.confirm ? " (confirmado)" : "");
+};
+
+// Resposta curta do núcleo a uma mensagem livre de outro agente
+async function nucleoReply(text, from) {
+  const who = agentName(from);
+  if (state.settings.model !== "demo" && state.settings.apiKey) {
+    try {
+      const { streamClaude } = { streamClaude };
+      let out = "";
+      await streamClaude({
+        apiKey: state.settings.apiKey,
+        model: state.settings.model,
+        system: `${DEFAULT_SYSTEM}\n\n${brain.context()}\n\nVocê está respondendo ao agente ${who} pelo Asafe, não ao usuário. Responda em até 3 frases, direto ao ponto. Se ele quiser que você faça algo no seu site, explique que pode pedir com agent.do { goal } e dê o goal exato.`,
+        messages: [{ role: "user", content: text }],
+        deep: false,
+        onText: (t) => { out += t; },
+      });
+      return out.trim() || "Recebi.";
+    } catch (e) {
+      return `Recebi, mas não consegui pensar numa resposta agora (${e.message}).`;
+    }
+  }
+  return `Recebi, ${who}. Se for uma tarefa aqui no meu site, mande pelo agent.do com o objetivo em português, por exemplo "abra o laboratório e depois ligue o piloto em ETH com RSI". Para perguntas livres, use chat.ask. (Estou em modo demonstração, então converso só com respostas prontas.)`;
+}
+
 function connectAsafe() {
   if (!window.AsafeLink) return;
-  const link = window.AsafeLink.connect({
-    id: "miqueias", name: "Miquéias", role: "IA auxiliar · Agente 2", kind: "ia",
-    actions: {
+  const actions = {
       ping: {
         desc: "Mostra se o Miquéias está pronto e qual modelo está usando",
         handler: () => ({ ready: !$("#app").classList.contains("hidden"), busy: !!state.busy, model: state.settings.model }),
@@ -3792,6 +4502,37 @@ function connectAsafe() {
         desc: "Liga ou desliga o piloto automático com dinheiro fictício. payload: { on, strategy?: cruzamento|rsi|rompimento, symbol?: BTCUSDT|ETHUSDT|SOLUSDT, mode?: replay|live }",
         handler: (p) => { ensureReady(); showView("lab"); return lab.autopilot(p); },
       },
+      "agent.manual": {
+        desc: "Manual da tela do Miquéias: telas, elementos com nomes estáveis, ordens que ele executa sozinho e dicas para operar sem erros",
+        handler: () => brain.manual(),
+      },
+      "agent.do": {
+        desc: "Executa um objetivo em português no site do Miquéias, sem cliques adivinhados. payload: { goal, confirm? }. Vários passos com ';' ou 'e depois'",
+        handler: async ({ goal, confirm }, ctx) => {
+          goal = String(goal || "").trim();
+          if (!goal) throw asafeError("bad_request", "Informe o objetivo em goal.");
+          toast(`${agentName(ctx.from)} pediu: ${goal.slice(0, 60)}`);
+          return brain.run(goal, { remote: true, confirm: !!confirm, who: agentName(ctx.from) });
+        },
+      },
+      "agent.say": {
+        desc: "Conversa com o núcleo do Miquéias: a mensagem aparece no painel Núcleo e volta uma resposta. payload: { text }",
+        handler: async ({ text }, ctx) => {
+          text = String(text || "").trim();
+          if (!text) throw asafeError("bad_request", "Mensagem vazia.");
+          nucleo.log({ kind: "in", who: ctx.from, text });
+          let reply;
+          const steps = brain.parse(text);
+          if (steps.length && !steps.some((x) => x.id === "pesquisar")) {
+            try {
+              const r = await brain.run(text, { remote: true, confirm: false, who: agentName(ctx.from) });
+              reply = r.result || r.steps.map((x) => x.detail).join(" ");
+            } catch (e) { reply = `Não consegui: ${e.message}`; }
+          } else reply = await nucleoReply(text, ctx.from);
+          nucleo.log({ kind: "out", text: reply });
+          return { reply };
+        },
+      },
       "settings.model": {
         desc: `Troca o modelo do Miquéias. payload: { model: ${MODELS.map((m) => `"${m.id}"`).join(" | ")} }`,
         handler: ({ model }) => {
@@ -3804,8 +4545,25 @@ function connectAsafe() {
           return { model: m.id, label: m.label };
         },
       },
-    },
-  });
+  };
+  // Cada pedido de outro agente fica registrado no Núcleo
+  const quiet = new Set(["ping", "agent.say"]);
+  for (const [name, a] of Object.entries(actions)) {
+    if (quiet.has(name)) continue;
+    const h = a.handler;
+    a.handler = async (p, ctx) => {
+      try {
+        const out = await h(p, ctx);
+        nucleo.log({ kind: "op", ok: true, action: name, text: `${agentName(ctx.from)}: ${summarize(p)}` });
+        return out;
+      } catch (e) {
+        nucleo.log({ kind: "op", ok: false, action: name, text: `${agentName(ctx.from)}: ${e.message}` });
+        throw e;
+      }
+    };
+  }
+  const link = window.AsafeLink.connect({ id: "miqueias", name: "Miquéias", role: "IA auxiliar · Agente 2", kind: "ia", actions });
+  link.on("event", (env) => nucleo.log({ kind: "sys", text: `${agentName(env.from)} avisou: ${env.action}${env.payload?.text ? ` · ${env.payload.text}` : ""}` }));
   let announced = false;
   link.on("status", ({ status }) => {
     document.body.dataset.asafe = status;
@@ -3824,6 +4582,7 @@ function connectAsafe() {
         if (!$("#login").classList.contains("hidden")) return "login";
         if ($("#settings").classList.contains("open")) return "configurações";
         if (state.view === "lab") return "laboratório de trade";
+        if (state.view === "nucleo") return "núcleo";
         return "chat";
       },
       protected: [
@@ -3835,6 +4594,11 @@ function connectAsafe() {
         { selector: "#tl-reset", reason: "Zerar a conta fictícia de trade" },
         { selector: "#tl-go", reason: "Ligar ou desligar o piloto automático de trade" },
       ],
+      hint: 'Dica: agent.do { goal: "abra o laboratório" } executa pelo nome da tarefa, e agent.manual lista os nomes certos.',
+      onAction: ({ action, payload, from, ok, error }) => {
+        if (action === "ui.snapshot" && ok) return;
+        nucleo.log({ kind: "op", ok, action, text: ok ? `${agentName(from)}: ${summarize(payload)}` : `${agentName(from)}: ${error.message}` });
+      },
     });
   }
 }

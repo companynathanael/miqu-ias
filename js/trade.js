@@ -742,6 +742,17 @@ export function createTradeLab({ root, toast, askChat, research, store }) {
       return { on: true, strategy: auto.strategy, mode: auto.mode, symbol: market.symbol, source: market.source };
     },
     stop: stopAuto,
+    /** Compra ou vende na conta fictícia, ao preço atual. */
+    async trade(side, { symbol, who = "Miquéias", reason = "Ordem direta." } = {}) {
+      if (!loaded) await this.open("sim");
+      if (symbol && !sym(symbol)) throw Object.assign(new Error(`Ativo desconhecido: ${symbol}.`), { code: "bad_request" });
+      if (symbol && symbol !== market.symbol && !auto.on) { market.symbol = symbol; q("#tl-symbol").value = symbol; await load(); }
+      if (!auto.on) cursor = market.candles.length - 1;
+      const ok = side === "buy" ? buy(reason, who) : sell(reason, who);
+      renderAccount(); drawChart();
+      if (!ok) throw Object.assign(new Error(side === "buy" ? "Não deu para comprar: já existe posição aberta ou falta saldo fictício." : "Não há posição aberta neste ativo para vender."), { code: "rejected" });
+      return { side, symbol: market.symbol, price: price(), equity: +equity().toFixed(2) };
+    },
     sites: SITES,
     redraw: drawChart,
   };

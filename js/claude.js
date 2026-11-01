@@ -36,13 +36,16 @@ const webSearchTool = (model) => ({
  * @param {(t:string)=>void} o.onThinking
  * @param {(q:string)=>void} o.onSearch    consulta que o modelo está pesquisando
  * @param {(s:{title:string,url:string}[])=>void} o.onSources  fontes encontradas
+ * @param {object[]} o.tools  ferramentas do próprio site (executadas no navegador)
+ * @param {(name:string, input:object)=>Promise<any>} o.onToolUse  executa uma ferramenta e devolve o resultado
  */
-export async function streamClaude({ apiKey, model, system, messages, deep, search, signal, onText, onThinking, onSearch, onSources }) {
+export async function streamClaude({ apiKey, model, system, messages, deep, search, signal, onText, onThinking, onSearch, onSources, tools: siteTools = [], onToolUse }) {
   const client = await getClient(apiKey);
   const convo = [...messages];
   let final;
-  // A busca no servidor pode pausar o turno (pause_turn); nesse caso continuamos de onde parou.
-  for (let round = 0; round < 4; round++) {
+  // A busca no servidor pode pausar o turno (pause_turn) e as ferramentas do site pedem
+  // uma volta a mais (tool_use); nos dois casos continuamos de onde parou.
+  for (let round = 0; round < 10; round++) {
     const params = {
       model,
       max_tokens: 64000,
@@ -51,7 +54,8 @@ export async function streamClaude({ apiKey, model, system, messages, deep, sear
       thinking: { type: "adaptive", display: deep ? "summarized" : "omitted" },
       output_config: { effort: deep || search ? "high" : "low" },
     };
-    if (search) params.tools = [webSearchTool(model)];
+    const tools = [...(search ? [webSearchTool(model)] : []), ...siteTools];
+    if (tools.length) params.tools = tools;
     if (FALLBACK_MODELS.has(model)) {
       params.betas = ["server-side-fallback-2026-07-01"];
       params.fallbacks = "default";
@@ -79,8 +83,21 @@ export async function streamClaude({ apiKey, model, system, messages, deep, sear
       const why = final.stop_details?.explanation;
       throw new Error("O modelo recusou este pedido." + (why ? ` (${why})` : ""));
     }
-    if (final.stop_reason !== "pause_turn") break;
+    if (final.stop_reason === "pause_turn") { convo.push({ role: "assistant", content: final.content }); continue; }
+    if (final.stop_reason !== "tool_use" || !onToolUse) break;
+
+    // Executa todas as ferramentas pedidas e devolve os resultados numa única mensagem
     convo.push({ role: "assistant", content: final.content });
+    const results = [];
+    for (const b of final.content.filter((c) => c.type === "tool_use")) {
+      try {
+        const out = await onToolUse(b.name, b.input);
+        results.push({ type: "tool_result", tool_use_id: b.id, content: JSON.stringify(out ?? {}).slice(0, 8000) });
+      } catch (e) {
+        results.push({ type: "tool_result", tool_use_id: b.id, is_error: true, content: `${e.code ? `[${e.code}] ` : ""}${e.message || e}` });
+      }
+    }
+    convo.push({ role: "user", content: results });
   }
   return final;
 }

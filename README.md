@@ -63,6 +63,9 @@ O Miquéias se conecta ao **Asafe** (protocolo em `companynathanael/Asafe`) pelo
 | `trade.status` | Conta fictícia, posição, piloto automático, último estudo e diário |
 | `trade.study` | Testa as 3 estratégias em BTC, ETH e SOL e devolve o ranking |
 | `trade.autopilot` `{ on, strategy?, symbol?, mode? }` | Liga/desliga o piloto automático (dinheiro fictício) |
+| `agent.manual` | Manual da tela: telas, nomes estáveis dos elementos, ordens que o Miquéias executa e dicas |
+| `agent.do` `{ goal, confirm? }` | Executa um objetivo em português ("abra o laboratório e depois ligue o piloto em ETH"); passos protegidos pedem `confirm` |
+| `agent.say` `{ text }` | Conversa com o núcleo do Miquéias; aparece no painel Núcleo e volta `{ reply }` |
 
 Ele tenta o servidor do Asafe em `http://localhost:7300`; se não achar, usa o modo navegador (BroadcastChannel), que exige a página do Asafe aberta no mesmo navegador. Pedidos são recusados enquanto o Miquéias está na tela de entrada ou respondendo outra mensagem.
 
@@ -86,3 +89,11 @@ O módulo `js/asafe-ui.js` (vindo de `companynathanael/Hor-cio-Jarvis`, commit 6
 - O aviso **"Horácio está operando"** com o botão **Parar** aparece sempre na primeira ação, mesmo sem `ui.control`. Ajuste feito na revisão.
 - Menus fechados e janelas fechadas não aparecem para o Horácio (o módulo verifica a transparência dos ancestrais). Ajuste feito na revisão.
 - Pedem `confirm: true` (confirmação na conversa do Horácio): Sair, Apagar todas as conversas, Apagar conversa, Chave de API, Salvar configurações, Zerar conta fictícia e o piloto automático de trade. Campos de senha e da chave nunca devolvem o valor.
+
+## Cérebro e Núcleo
+
+- **Cérebro** (`js/brain.js`): entende ordens em português e executa no próprio site (abrir telas, consultar e operar o Laboratório de Trade, pesquisar, mandar mensagem ao Horácio, ver os agentes). Funciona no modo demonstração e, com a chave da API, vira uma ferramenta (`executar_no_site`) que o Claude usa sozinho quando você pede uma ação. Cada ação feita aparece como um selo acima da resposta.
+- **Memória**: "lembre que…", "esqueça…", "o que você lembra sobre mim?". Fica no navegador e entra no contexto do modelo.
+- **Contexto**: o modelo recebe a tela atual, o estado da conta fictícia e a memória.
+- **Núcleo** (`js/nucleo.js`): painel com o status do Asafe e do Horácio, a conversa entre os dois e o registro de cada pedido ou operação de tela, com erro e sugestão. O Miquéias fala com o Horácio por `chat.say` quando ele tiver essa ação; até lá, por `notify` (sem resposta).
+- Os botões principais têm nomes estáveis (`data-asafe-name`): Nova conversa, Conta, Modelo, Enviar, Pesquisa, Laboratório de Trade, Núcleo. Erros `not_found`/`ambiguous` dos `ui.*` trazem nomes parecidos e a dica de usar `agent.do`.

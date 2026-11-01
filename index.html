@@ -137,7 +137,7 @@
         </button>
       </div>
 
-      <button class="btn new-chat" id="new-chat">
+      <button class="btn new-chat" id="new-chat" data-asafe-name="Nova conversa">
         <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
         Nova conversa
         <kbd>Ctrl K</kbd>
@@ -150,20 +150,24 @@
 
       <nav class="skills" id="skills" aria-label="Habilidades">
         <div class="h-group">Habilidades</div>
-        <button class="skill-item" data-skill="research">
+        <button class="skill-item" data-skill="research" data-asafe-name="Pesquisa">
           <span class="sk-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></span>
           <span><b>Pesquisa</b><small>Busca na web com fontes</small></span>
         </button>
-        <button class="skill-item" data-skill="trade">
+        <button class="skill-item" data-skill="trade" data-asafe-name="Laboratório de Trade">
           <span class="sk-ic"><svg viewBox="0 0 24 24"><path d="M4 19V5M4 19h16"/><path d="m7 15 4-4 3 3 5-6"/></svg></span>
           <span><b>Laboratório de Trade</b><small>Estuda e pratica com dinheiro fictício</small></span>
+        </button>
+        <button class="skill-item" data-skill="nucleo" data-asafe-name="Núcleo">
+          <span class="sk-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.5"/><circle cx="5" cy="6" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="12" cy="20" r="2"/><path d="M6.6 7.2 10 10.6M17.4 7.2 14 10.6M12 14.5V18"/></svg></span>
+          <span><b>Núcleo</b><small>Conversa com o Horácio</small></span>
         </button>
       </nav>
 
       <nav class="history" id="history" aria-label="Histórico"></nav>
 
       <div class="side-foot">
-        <button class="user-chip" id="user-chip">
+        <button class="user-chip" id="user-chip" data-asafe-name="Conta">
           <span class="avatar" id="avatar">M</span>
           <span class="user-meta">
             <strong id="user-name">Convidado</strong>
@@ -194,7 +198,7 @@
         <button class="icon-btn" id="open-side" aria-label="Abrir menu">
           <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
         </button>
-        <button class="model-pill" id="model-pill" aria-haspopup="true">
+        <button class="model-pill" id="model-pill" aria-haspopup="true" data-asafe-name="Modelo">
           <span class="pulse"></span>
           <span id="model-label">Miquéias 2 · Demo</span>
           <svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
@@ -220,6 +224,7 @@
       </div>
 
       <section class="lab hidden" id="lab" aria-label="Laboratório de Trade"></section>
+      <section class="lab hidden" id="nucleo" aria-label="Núcleo"></section>
 
       <div class="composer-wrap">
         <button class="scroll-down" id="scroll-down" aria-label="Rolar para o fim">
@@ -243,7 +248,7 @@
                 Raciocínio profundo
               </button>
             </div>
-            <button type="submit" class="send" id="send" aria-label="Enviar">
+            <button type="submit" class="send" id="send" aria-label="Enviar" data-asafe-name="Enviar">
               <svg class="i-send" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
               <svg class="i-stop" viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="2"/></svg>
             </button>

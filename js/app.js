@@ -2,6 +2,8 @@ import { renderMarkdown } from "./markdown.js";
 import { demoReply, streamDemo, THINK_STEPS } from "./demo.js";
 import { playIntro } from "./intro.js";
 import { createTradeLab } from "./trade.js";
+import { createBrain } from "./brain.js";
+import { createNucleo } from "./nucleo.js";
 
 /* =========================================================
    Utilidades
@@ -369,6 +371,7 @@ function aiShell(animate) {
       <div class="name">Miquéias <small></small></div>
       <div class="think-slot"></div>
       <div class="search-slot"></div>
+      <div class="tool-slot"></div>
       <div class="md"></div>
       <div class="sources"></div>
       <div class="actions"></div>
@@ -392,6 +395,7 @@ function addAiMsg(m, isLast, animate = true) {
   el.querySelector(".name small").textContent = m.model ? (MODELS.find((x) => x.id === m.model)?.label.split("· ")[1] || "") : "";
   if (m.thinking) renderThinking(el, m.thinking, false);
   if (m.searches?.length) renderSearching(el, m.searches, false);
+  if (m.actions?.length) renderActions(el, m.actions);
   if (m.sources?.length) renderSources(el, m.sources);
   el.querySelector(".md").innerHTML = m.error ? "" : renderMarkdown(m.content);
   if (m.error) showError(el, m.error);
@@ -415,6 +419,18 @@ function renderSearching(el, queries, live) {
   slot.innerHTML = `<div class="search-box ${live ? "live" : ""}">${ICON.globe}<span class="${live ? "shimmer" : ""}">${live ? "Pesquisando na web…" : `Pesquisou na web (${queries.length} ${queries.length === 1 ? "busca" : "buscas"})`}</span></div><ul class="search-q"></ul>`;
   const ul = slot.querySelector("ul");
   queries.filter(Boolean).forEach((q) => { const li = document.createElement("li"); li.textContent = q; ul.append(li); });
+}
+
+function renderActions(el, list) {
+  const slot = el.querySelector(".tool-slot");
+  slot.innerHTML = "";
+  list.forEach((a) => {
+    const c = document.createElement("div");
+    c.className = `act-chip ${a.ok ? "ok" : "err"}`;
+    c.innerHTML = a.ok ? '<svg viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg>' : '<svg viewBox="0 0 24 24"><path d="M12 8v5M12 16.5v.5"/><circle cx="12" cy="12" r="9"/></svg>';
+    c.append(a.detail);
+    slot.append(c);
+  });
 }
 
 function renderSources(el, sources) {
@@ -460,6 +476,17 @@ async function send(text, { regenerate = false, onText: onTextExt, search } = {}
   let useSearch = search ?? state.search;
   const cmd = text.match(/^\/pesquisa(?:r)?\s+([\s\S]+)/i);
   if (cmd) { useSearch = true; text = cmd[1].trim(); }
+  if (!regenerate && !search && text) {
+    const pre = brain.parse(text);
+    if (pre.length === 1 && pre[0].id === "nova_conversa") {
+      openChat(null);
+      $("#input").value = "";
+      autosize();
+      toast("Conversa nova aberta");
+      return;
+    }
+    if (pre.length === 1 && pre[0].id === "pesquisar") useSearch = true;
+  }
   if (!text && !state.pendingFile && !regenerate) return;
 
   const model = state.settings.model;
@@ -541,7 +568,25 @@ async function send(text, { regenerate = false, onText: onTextExt, search } = {}
       }
       const lastUser = [...chat.messages].reverse().find((m) => m.role === "user");
       const prompt = lastUser.content + (lastUser.file ? ` ${lastUser.file.name}` : "");
-      if (useSearch) {
+      const steps = useSearch ? [] : brain.parse(prompt);
+      if (steps.length) {
+        am.actions = [];
+        const outs = [];
+        for (const st of steps) {
+          try {
+            const r = await brain.exec(st, { who: "Você" });
+            am.actions.push({ ok: true, detail: r.detail });
+            if (r.text) outs.push(r.text);
+          } catch (e) {
+            am.actions.push({ ok: false, detail: e.message });
+            outs.push(`Não consegui fazer isso: ${e.message}`);
+            break;
+          } finally {
+            renderActions(el, am.actions);
+          }
+        }
+        await streamDemo(outs.join("\n\n") || `Feito. ${am.actions.map((a) => a.detail).join(" ")}`, { signal: ctrl.signal, onText });
+      } else if (useSearch) {
         await sleep(500);
         const r = demoResearch(prompt);
         am.sources = r.sources;
@@ -559,10 +604,24 @@ async function send(text, { regenerate = false, onText: onTextExt, search } = {}
       await streamClaude({
         apiKey: state.settings.apiKey,
         model,
-        system: (state.settings.system || DEFAULT_SYSTEM) + (useSearch ? `\n\nHoje é ${new Date().toLocaleDateString("pt-BR")}. Pesquise na web antes de responder, compare as fontes e cite-as no texto. Diga claramente quando algo não pôde ser confirmado.` : ""),
+        system: (state.settings.system || DEFAULT_SYSTEM) + `\n\n${brain.context()}` + (useSearch ? `\n\nHoje é ${new Date().toLocaleDateString("pt-BR")}. Pesquise na web antes de responder, compare as fontes e cite-as no texto. Diga claramente quando algo não pôde ser confirmado.` : ""),
         messages: history,
         deep: state.deep,
         search: useSearch,
+        tools: brain.tools,
+        onToolUse: async (name, input) => {
+          am.actions = am.actions || [];
+          try {
+            const r = await brain.runTool(name, input);
+            am.actions.push({ ok: true, detail: r.steps.map((x) => x.detail).join(" ") });
+            return r;
+          } catch (e) {
+            am.actions.push({ ok: false, detail: e.message });
+            throw e;
+          } finally {
+            renderActions(el, am.actions);
+          }
+        },
         onSearch: (q) => { am.searches.push(q); renderSearching(el, am.searches, true); },
         onSources: (list) => {
           list.forEach((s) => { if (!am.sources.some((x) => x.url === s.url)) am.sources.push(s); });
@@ -705,6 +764,7 @@ function bind() {
       $("#input").focus();
     }
     if (b.dataset.skill === "trade") showView("lab");
+    if (b.dataset.skill === "nucleo") showView("nucleo");
     closeSidebarMobile();
   });
   $("#think-toggle").addEventListener("click", (e) => {
@@ -887,8 +947,11 @@ function showView(v) {
   state.view = v;
   $("#app").dataset.view = v;
   $("#lab").classList.toggle("hidden", v !== "lab");
-  $$("#skills [data-skill]").forEach((b) => b.classList.toggle("active", b.dataset.skill === "trade" && v === "lab"));
-  if (v === "lab") { lab.open(); $$(".h-item.active").forEach((x) => x.classList.remove("active")); }
+  $("#nucleo").classList.toggle("hidden", v !== "nucleo");
+  $$("#skills [data-skill]").forEach((b) => b.classList.toggle("active", (b.dataset.skill === "trade" && v === "lab") || (b.dataset.skill === "nucleo" && v === "nucleo") || (b.dataset.skill === "research" && v === "chat" && state.search)));
+  if (v !== "chat") $$(".h-item.active").forEach((x) => x.classList.remove("active"));
+  if (v === "lab") lab.open();
+  if (v === "nucleo") nucleo.open();
 }
 
 function setSearch(on) {
@@ -980,6 +1043,54 @@ lab = createTradeLab({
   askChat: (t) => { openChat(null); send(t); },
   research: (t) => { openChat(null); send(t, { search: true }); },
 });
+
+/* ---------- conversa com outros agentes pelo Asafe ---------- */
+async function rosterSafe() {
+  const link = window.miqueiasAsafe;
+  if (!link || link.status !== "online") return [];
+  try { return await link.roster(); } catch { return []; }
+}
+async function tellAgent(to, text) {
+  const link = window.miqueiasAsafe;
+  if (!link || link.status !== "online") throw asafeError("offline", "O Miquéias não está conectado ao Asafe. Abra o Asafe no mesmo navegador (ou ligue o servidor).");
+  const ag = (await rosterSafe()).find((a) => a.id === to);
+  const acts = (ag?.actions || []).map((a) => a.name || a);
+  if (acts.includes("chat.say")) {
+    const r = await link.request(to, "chat.say", { text, from: "miqueias" }, { timeout: 90000 });
+    return { reply: r?.reply ?? r?.text ?? null };
+  }
+  await link.request(to, "notify", { text: `Miquéias: ${text}` }, { timeout: 10000 });
+  return { reply: null };
+}
+
+const brain = createBrain({
+  store,
+  lab,
+  openChat,
+  showView,
+  openSettings,
+  getView: () => (!$("#login").classList.contains("hidden") ? "login" : state.view || "chat"),
+  isLoggedIn: () => !$("#app").classList.contains("hidden"),
+  userName: () => state.settings.name || state.user?.name || "",
+  research: async (q) => { openChat(null); return send(q, { search: true }); },
+  tellAgent: async (to, text) => {
+    nucleo.log({ kind: "out", text });
+    const r = await tellAgent(to, text);
+    if (r.reply) nucleo.log({ kind: "in", who: to, text: r.reply });
+    return r;
+  },
+  roster: rosterSafe,
+});
+const nucleo = createNucleo({
+  root: $("#nucleo"),
+  toast,
+  store,
+  brain,
+  getLink: () => window.miqueiasAsafe,
+  tellAgent,
+  roster: rosterSafe,
+});
+
 inlineLogos();
 applyMotion();
 startBackground();
@@ -1008,11 +1119,38 @@ function ensureReady() {
   if (state.busy) throw asafeError("busy", "O Miquéias está respondendo outra mensagem agora.");
 }
 
+const summarize = (p) => {
+  const keys = Object.entries(p || {}).filter(([k, v]) => v !== undefined && k !== "confirm");
+  if (!keys.length) return "sem parâmetros";
+  return keys.map(([k, v]) => `${k}: ${typeof v === "string" ? `"${v.slice(0, 60)}"` : JSON.stringify(v)}`).join(", ") + (p?.confirm ? " (confirmado)" : "");
+};
+
+// Resposta curta do núcleo a uma mensagem livre de outro agente
+async function nucleoReply(text, from) {
+  const who = agentName(from);
+  if (state.settings.model !== "demo" && state.settings.apiKey) {
+    try {
+      const { streamClaude } = await import("./claude.js");
+      let out = "";
+      await streamClaude({
+        apiKey: state.settings.apiKey,
+        model: state.settings.model,
+        system: `${DEFAULT_SYSTEM}\n\n${brain.context()}\n\nVocê está respondendo ao agente ${who} pelo Asafe, não ao usuário. Responda em até 3 frases, direto ao ponto. Se ele quiser que você faça algo no seu site, explique que pode pedir com agent.do { goal } e dê o goal exato.`,
+        messages: [{ role: "user", content: text }],
+        deep: false,
+        onText: (t) => { out += t; },
+      });
+      return out.trim() || "Recebi.";
+    } catch (e) {
+      return `Recebi, mas não consegui pensar numa resposta agora (${e.message}).`;
+    }
+  }
+  return `Recebi, ${who}. Se for uma tarefa aqui no meu site, mande pelo agent.do com o objetivo em português, por exemplo "abra o laboratório e depois ligue o piloto em ETH com RSI". Para perguntas livres, use chat.ask. (Estou em modo demonstração, então converso só com respostas prontas.)`;
+}
+
 function connectAsafe() {
   if (!window.AsafeLink) return;
-  const link = window.AsafeLink.connect({
-    id: "miqueias", name: "Miquéias", role: "IA auxiliar · Agente 2", kind: "ia",
-    actions: {
+  const actions = {
       ping: {
         desc: "Mostra se o Miquéias está pronto e qual modelo está usando",
         handler: () => ({ ready: !$("#app").classList.contains("hidden"), busy: !!state.busy, model: state.settings.model }),
@@ -1065,6 +1203,37 @@ function connectAsafe() {
         desc: "Liga ou desliga o piloto automático com dinheiro fictício. payload: { on, strategy?: cruzamento|rsi|rompimento, symbol?: BTCUSDT|ETHUSDT|SOLUSDT, mode?: replay|live }",
         handler: (p) => { ensureReady(); showView("lab"); return lab.autopilot(p); },
       },
+      "agent.manual": {
+        desc: "Manual da tela do Miquéias: telas, elementos com nomes estáveis, ordens que ele executa sozinho e dicas para operar sem erros",
+        handler: () => brain.manual(),
+      },
+      "agent.do": {
+        desc: "Executa um objetivo em português no site do Miquéias, sem cliques adivinhados. payload: { goal, confirm? }. Vários passos com ';' ou 'e depois'",
+        handler: async ({ goal, confirm }, ctx) => {
+          goal = String(goal || "").trim();
+          if (!goal) throw asafeError("bad_request", "Informe o objetivo em goal.");
+          toast(`${agentName(ctx.from)} pediu: ${goal.slice(0, 60)}`);
+          return brain.run(goal, { remote: true, confirm: !!confirm, who: agentName(ctx.from) });
+        },
+      },
+      "agent.say": {
+        desc: "Conversa com o núcleo do Miquéias: a mensagem aparece no painel Núcleo e volta uma resposta. payload: { text }",
+        handler: async ({ text }, ctx) => {
+          text = String(text || "").trim();
+          if (!text) throw asafeError("bad_request", "Mensagem vazia.");
+          nucleo.log({ kind: "in", who: ctx.from, text });
+          let reply;
+          const steps = brain.parse(text);
+          if (steps.length && !steps.some((x) => x.id === "pesquisar")) {
+            try {
+              const r = await brain.run(text, { remote: true, confirm: false, who: agentName(ctx.from) });
+              reply = r.result || r.steps.map((x) => x.detail).join(" ");
+            } catch (e) { reply = `Não consegui: ${e.message}`; }
+          } else reply = await nucleoReply(text, ctx.from);
+          nucleo.log({ kind: "out", text: reply });
+          return { reply };
+        },
+      },
       "settings.model": {
         desc: `Troca o modelo do Miquéias. payload: { model: ${MODELS.map((m) => `"${m.id}"`).join(" | ")} }`,
         handler: ({ model }) => {
@@ -1077,8 +1246,25 @@ function connectAsafe() {
           return { model: m.id, label: m.label };
         },
       },
-    },
-  });
+  };
+  // Cada pedido de outro agente fica registrado no Núcleo
+  const quiet = new Set(["ping", "agent.say"]);
+  for (const [name, a] of Object.entries(actions)) {
+    if (quiet.has(name)) continue;
+    const h = a.handler;
+    a.handler = async (p, ctx) => {
+      try {
+        const out = await h(p, ctx);
+        nucleo.log({ kind: "op", ok: true, action: name, text: `${agentName(ctx.from)}: ${summarize(p)}` });
+        return out;
+      } catch (e) {
+        nucleo.log({ kind: "op", ok: false, action: name, text: `${agentName(ctx.from)}: ${e.message}` });
+        throw e;
+      }
+    };
+  }
+  const link = window.AsafeLink.connect({ id: "miqueias", name: "Miquéias", role: "IA auxiliar · Agente 2", kind: "ia", actions });
+  link.on("event", (env) => nucleo.log({ kind: "sys", text: `${agentName(env.from)} avisou: ${env.action}${env.payload?.text ? ` · ${env.payload.text}` : ""}` }));
   let announced = false;
   link.on("status", ({ status }) => {
     document.body.dataset.asafe = status;
@@ -1097,6 +1283,7 @@ function connectAsafe() {
         if (!$("#login").classList.contains("hidden")) return "login";
         if ($("#settings").classList.contains("open")) return "configurações";
         if (state.view === "lab") return "laboratório de trade";
+        if (state.view === "nucleo") return "núcleo";
         return "chat";
       },
       protected: [
@@ -1108,6 +1295,11 @@ function connectAsafe() {
         { selector: "#tl-reset", reason: "Zerar a conta fictícia de trade" },
         { selector: "#tl-go", reason: "Ligar ou desligar o piloto automático de trade" },
       ],
+      hint: 'Dica: agent.do { goal: "abra o laboratório" } executa pelo nome da tarefa, e agent.manual lista os nomes certos.',
+      onAction: ({ action, payload, from, ok, error }) => {
+        if (action === "ui.snapshot" && ok) return;
+        nucleo.log({ kind: "op", ok, action, text: ok ? `${agentName(from)}: ${summarize(payload)}` : `${agentName(from)}: ${error.message}` });
+      },
     });
   }
 }

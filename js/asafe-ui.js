@@ -19,7 +19,9 @@
    - o aviso "está operando" e o cursor aparecem sempre na primeira ação ui.*,
      mesmo sem um ui.control antes (nada de controle invisível);
    - um elemento só conta como visível se nenhum ancestral estiver transparente
-     ou invisível (menus fechados e a janela de configurações fechada somem).
+     ou invisível (menus fechados e a janela de configurações fechada somem);
+   - erros not_found e ambiguous trazem sugestões com os nomes mais parecidos
+     da tela e a dica de cfg.hint; cfg.onAction recebe cada operação (registro).
    ========================================================= */
 (function (root) {
   const norm = (s) => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
@@ -294,12 +296,41 @@
       "ui.wait": "Espera um texto aparecer ou o agente terminar. payload: { text? , idle?, timeout? }"
     };
     // Toda ação ui.* acende o aviso com o botão Parar: o controle nunca fica invisível.
+    const words = (s) => norm(s).split(" ").filter((w) => w.length > 2);
+    function suggest(wanted) {
+      const want = words(wanted);
+      if (!want.length) return [];
+      return collect()
+        .filter((i) => i.name && i.role !== "heading")
+        .map((i) => {
+          const n = norm(i.name);
+          const score = want.reduce((a, w) => a + (n.includes(w) ? 2 : n.split(" ").some((x) => x.startsWith(w.slice(0, 4))) ? 1 : 0), 0);
+          return { name: i.name, score };
+        })
+        .filter((x) => x.score > 0)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 3)
+        .map((x) => x.name);
+    }
     const announced = (name, fn) => async (p, ctx) => {
+      p = p || {};
       if (name !== "ui.control" && !control.on && !control.stopped) {
         control = { on: true, by: ctx.from, stopped: false };
         showUI(ctx.from);
       }
-      return fn(p || {}, ctx);
+      try {
+        const out = await fn(p, ctx);
+        try { cfg.onAction && cfg.onAction({ action: name, payload: p, from: ctx.from, ok: true, result: out }); } catch (e) { /* registro opcional */ }
+        return out;
+      } catch (e) {
+        if ((e.code === "not_found" || e.code === "ambiguous") && p.name) {
+          const s = suggest(p.name);
+          if (s.length) e.message += ` Talvez: ${s.map((x) => `"${x}"`).join(", ")}.`;
+        }
+        if (e.code === "not_found" && cfg.hint) e.message += ` ${cfg.hint}`;
+        try { cfg.onAction && cfg.onAction({ action: name, payload: p, from: ctx.from, ok: false, error: { code: e.code, message: e.message } }); } catch (x) { /* registro opcional */ }
+        throw e;
+      }
     };
     for (const name of Object.keys(actions)) link.handle(name, announced(name, actions[name]), desc[name]);
     return { collect, find };
