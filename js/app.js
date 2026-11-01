@@ -1,5 +1,6 @@
 import { renderMarkdown } from "./markdown.js";
 import { demoReply, streamDemo, THINK_STEPS } from "./demo.js";
+import { playIntro } from "./intro.js";
 
 /* =========================================================
    Utilidades
@@ -136,7 +137,7 @@ async function motionBlurPulse(el, axis = "x", ms = 520) {
   const t0 = performance.now();
   await new Promise((done) => {
     const step = (now) => {
-      const k = Math.min(1, (now - t0) / ms);
+      const k = Math.max(0, Math.min(1, (now - t0) / ms));
       const s = (1 - k) ** 2 * 26;
       f.setAttribute("stdDeviation", axis === "x" ? `${s} 0` : `0 ${s}`);
       if (k < 1) requestAnimationFrame(step); else done();
@@ -156,7 +157,6 @@ function splitTitle() {
 }
 
 function initLogin() {
-  splitTitle();
   const form = $("#login-form");
   const tabs = $(".tabs");
   const setMode = (mode) => {
@@ -442,6 +442,7 @@ async function send(text, { regenerate = false } = {}) {
   }
 
   if (!regenerate) {
+    sparks($("#send"));
     const um = { role: "user", content: text };
     if (state.pendingFile) um.file = state.pendingFile;
     chat.messages.push(um);
@@ -535,6 +536,7 @@ async function send(text, { regenerate = false } = {}) {
     cancelAnimationFrame(raf);
     chatEl().removeEventListener("scroll", onScroll);
     el.classList.remove("streaming");
+    el.classList.add("done");
     if (am.error && !am.content) showError(el, am.error);
     else mdEl.innerHTML = renderMarkdown(am.content || "_(resposta interrompida)_");
     if (!am.content && !am.error) am.content = "_(resposta interrompida)_";
@@ -813,11 +815,78 @@ function bind() {
   link.remove();
   document.head.append(clone);
 })();
+/* ---------- logos vivas: desenho inline + brilho que percorre o traço ---------- */
+const LOGO_PATHS = [
+  ["logo-frame", "M43 57 L27 31 L27 93 L4 80 L4 21 L32 5 L50 37 L68 5 L96 21 L96 80 L73 93 L73 31 L57 57"],
+  ["logo-t", "M33 50 H67 M50 50 V88"],
+];
+function inlineLogos(scope = document) {
+  $$("svg.logo", scope).forEach((svg) => {
+    if (!svg.querySelector("use")) return;
+    const paths = (extra) => LOGO_PATHS.map(([c, d]) => `<path class="${c}${extra}" pathLength="1" d="${d}"/>`).join("");
+    svg.setAttribute("viewBox", "-6 -6 112 112");
+    svg.innerHTML = `<g fill="none" stroke="currentColor" stroke-width="9" stroke-linejoin="miter" stroke-miterlimit="4">${paths("")}${paths(" shine")}</g>`;
+  });
+}
+new MutationObserver((list) => list.forEach((m) => m.addedNodes.forEach((n) => n.nodeType === 1 && inlineLogos(n))))
+  .observe(document.body, { childList: true, subtree: true });
+
+/* ---------- ondas de clique ---------- */
+document.addEventListener("pointerdown", (e) => {
+  if (state.settings.reduceMotion) return;
+  const b = e.target.closest(".btn, .icon-btn, .sugg, .send, .h-item, .chip-toggle, .model-pill, .tab, .user-chip");
+  if (!b || b.disabled) return;
+  const r = b.getBoundingClientRect();
+  const dot = document.createElement("span");
+  dot.className = "ripple";
+  dot.style.left = `${e.clientX - r.left}px`;
+  dot.style.top = `${e.clientY - r.top}px`;
+  b.append(dot);
+  setTimeout(() => dot.remove(), 700);
+});
+
+/* ---------- faíscas ao enviar ---------- */
+function sparks(el) {
+  if (state.settings.reduceMotion || !el) return;
+  const r = el.getBoundingClientRect();
+  for (let i = 0; i < 14; i++) {
+    const s = document.createElement("i");
+    s.className = "spark";
+    const a = (i / 14) * Math.PI * 2 + Math.random() * 0.4;
+    const d = 26 + Math.random() * 34;
+    s.style.left = `${r.left + r.width / 2}px`;
+    s.style.top = `${r.top + r.height / 2}px`;
+    s.style.setProperty("--dx", `${Math.cos(a) * d}px`);
+    s.style.setProperty("--dy", `${Math.sin(a) * d}px`);
+    document.body.append(s);
+    setTimeout(() => s.remove(), 700);
+  }
+}
+
+/* ---------- a logo da tela inicial acompanha o cursor ---------- */
+addEventListener("pointermove", (e) => {
+  const logo = $(".welcome-logo");
+  if (!logo || state.settings.reduceMotion) return;
+  const x = (e.clientX / innerWidth - 0.5) * 18;
+  const y = (e.clientY / innerHeight - 0.5) * 14;
+  logo.style.translate = `${x}px ${y}px`;
+});
+
+/* =========================================================
+   Início: abertura → login ou app
+   ========================================================= */
+inlineLogos();
 applyMotion();
 startBackground();
 initLogin();
 bind();
-if (state.user) {
-  $("#login").classList.add("hidden");
-  showApp();
-}
+playIntro({
+  reduceMotion: state.settings.reduceMotion || matchMedia("(prefers-reduced-motion: reduce)").matches,
+  onReveal() {
+    if (state.user) showApp();
+    else {
+      $("#login").classList.remove("hidden");
+      splitTitle();
+    }
+  },
+});
