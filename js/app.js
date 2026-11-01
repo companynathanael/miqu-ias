@@ -420,7 +420,7 @@ function scrollToEnd(smooth = true) {
 }
 
 /* ---------- envio ---------- */
-async function send(text, { regenerate = false } = {}) {
+async function send(text, { regenerate = false, onText: onTextExt } = {}) {
   if (state.busy) return;
   text = text.trim();
   if (!text && !state.pendingFile && !regenerate) return;
@@ -481,7 +481,7 @@ async function send(text, { regenerate = false } = {}) {
     else mdEl.insertAdjacentHTML("beforeend", cur);
     if (follow) scrollToEnd(false);
   };
-  const onText = (t) => { am.content += t; if (!raf) raf = requestAnimationFrame(paint); };
+  const onText = (t) => { am.content += t; onTextExt?.(t); if (!raf) raf = requestAnimationFrame(paint); };
 
   try {
     if (model === "demo") {
@@ -547,6 +547,7 @@ async function send(text, { regenerate = false } = {}) {
     setBusy(null);
     if (follow) scrollToEnd();
   }
+  return am;
 }
 
 function setBusy(ctrl) {
@@ -890,3 +891,68 @@ playIntro({
     }
   },
 });
+
+/* =========================================================
+   Asafe: linha de servidor (protocolo em companynathanael/Asafe)
+   Outros agentes (ex.: o Horácio) pedem coisas ao Miquéias pelo Asafe.
+   ========================================================= */
+const agentName = (id) => ({ horacio: "Horácio", asafe: "Asafe" }[id] || id);
+const asafeError = (code, message) => Object.assign(new Error(message), { code });
+
+function ensureReady() {
+  if ($("#app").classList.contains("hidden")) throw asafeError("not_ready", "O Miquéias está na tela de entrada. Entre no Miquéias e tente de novo.");
+  if (state.busy) throw asafeError("busy", "O Miquéias está respondendo outra mensagem agora.");
+}
+
+function connectAsafe() {
+  if (!window.AsafeLink) return;
+  const link = window.AsafeLink.connect({
+    id: "miqueias", name: "Miquéias", role: "IA auxiliar · Agente 2", kind: "ia",
+    actions: {
+      ping: {
+        desc: "Mostra se o Miquéias está pronto e qual modelo está usando",
+        handler: () => ({ ready: !$("#app").classList.contains("hidden"), busy: !!state.busy, model: state.settings.model }),
+      },
+      "chat.ask": {
+        desc: "Envia um pedido ao Miquéias, que responde na própria interface e devolve o texto. payload: { prompt, newChat? }",
+        handler: async ({ prompt, newChat = true }, ctx) => {
+          prompt = String(prompt || "").trim();
+          if (!prompt) throw asafeError("bad_request", "Pedido vazio.");
+          ensureReady();
+          if (newChat) openChat(null);
+          toast(`Pedido de ${agentName(ctx.from)} pelo Asafe`);
+          const am = await send(prompt, { onText: (t) => ctx.progress({ delta: t }) });
+          if (!am) throw asafeError("rejected", "O Miquéias não conseguiu iniciar a resposta (confira o modelo e a chave da API).");
+          if (am.error) throw asafeError("model_error", am.error);
+          const chat = current();
+          if (chat && newChat && !chat.title.startsWith("⇄")) { chat.title = `⇄ ${agentName(ctx.from)}: ${chat.title}`; saveChats(); renderHistory(); }
+          return { reply: am.content, model: am.model, chatId: state.currentId };
+        },
+      },
+      "chat.new": {
+        desc: "Abre uma conversa nova no Miquéias",
+        handler: () => { ensureReady(); openChat(null); return { ok: true }; },
+      },
+      "settings.model": {
+        desc: `Troca o modelo do Miquéias. payload: { model: ${MODELS.map((m) => `"${m.id}"`).join(" | ")} }`,
+        handler: ({ model }) => {
+          const m = MODELS.find((x) => x.id === model);
+          if (!m) throw asafeError("bad_request", `Modelo desconhecido: ${model}`);
+          if (m.id !== "demo" && !state.settings.apiKey) throw asafeError("no_api_key", "Esse modelo precisa de uma chave da API configurada no Miquéias.");
+          state.settings.model = m.id;
+          saveSettings();
+          renderModel();
+          return { model: m.id, label: m.label };
+        },
+      },
+    },
+  });
+  let announced = false;
+  link.on("status", ({ status }) => {
+    document.body.dataset.asafe = status;
+    if (status === "online" && !announced) { announced = true; toast("Conectado ao Asafe"); }
+    if (status !== "online") announced = false;
+  });
+  window.miqueiasAsafe = link;
+}
+connectAsafe();

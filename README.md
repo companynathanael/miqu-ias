@@ -48,3 +48,16 @@ assets/           logo (SVG + imagem original)
 
 `miqueias.html` traz o site inteiro (HTML, CSS e JS) em um só arquivo: basta abrir com dois cliques, sem servidor.
 Ele é gerado a partir dos arquivos em `css/` e `js/`; edite-os e gere de novo quando mudar algo.
+
+## Conexão com o Asafe
+
+O Miquéias se conecta ao **Asafe** (protocolo em `companynathanael/Asafe`) pelo arquivo `js/asafe-link.js`. Assim outros agentes, como o Horácio, podem pedir coisas a ele:
+
+| Ação | O que faz |
+|---|---|
+| `ping` | Diz se o Miquéias está pronto e qual modelo está usando |
+| `chat.ask` `{ prompt, newChat? }` | Abre uma conversa "⇄ Horácio: …", responde na tela e devolve o texto em streaming |
+| `chat.new` | Abre uma conversa nova |
+| `settings.model` `{ model }` | Troca o modelo |
+
+Ele tenta o servidor do Asafe em `http://localhost:7300`; se não achar, usa o modo navegador (BroadcastChannel), que exige a página do Asafe aberta no mesmo navegador. Pedidos são recusados enquanto o Miquéias está na tela de entrada ou respondendo outra mensagem.
